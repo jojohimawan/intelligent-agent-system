@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package location;
+option go_package = "github.com/jojohimawan/intelligent-agent-system.git/api;api";
+
+message LocationRequest {
+    double lat = 1;
+    double lon = 2;
+    int64 timestamp = 3;
+}
+
+message LocationResponse {
+    double lat = 1;
+    double lon = 2;
+    int64 timestamp = 3;
+    bool success = 4;
+    string status = 5;
+}
+
+service LocationService {
+    rpc SendLocation(LocationRequest) returns (LocationResponse);
+}
