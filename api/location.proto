@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package location;
-option go_package = "github.com/jojohimawan/intelligent-agent-system.git/api;api";
+option go_package = "github.com/jojohimawan/intelligent-agent-system/api;api";
 
 message LocationRequest {
     double lat = 1;

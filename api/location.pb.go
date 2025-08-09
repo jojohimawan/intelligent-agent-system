@@ -173,7 +173,7 @@ const file_api_location_proto_rawDesc = "" +
 	"\asuccess\x18\x04 \x01(\bR\asuccess\x12\x16\n" +
 	"\x06status\x18\x05 \x01(\tR\x06status2X\n" +
 	"\x0fLocationService\x12E\n" +
-	"\fSendLocation\x12\x19.location.LocationRequest\x1a\x1a.location.LocationResponseB=Z;github.com/jojohimawan/intelligent-agent-system.git/api;apib\x06proto3"
+	"\fSendLocation\x12\x19.location.LocationRequest\x1a\x1a.location.LocationResponseB9Z7github.com/jojohimawan/intelligent-agent-system/api;apib\x06proto3"
 
 var (
 	file_api_location_proto_rawDescOnce sync.Once
