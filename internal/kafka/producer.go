@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	ckafka "github.com/confluentinc/confluent-kafka-go/v2/kafka"
+	ckafka "github.com/confluentinc/confluent-kafka-go/kafka"
 	srclient "github.com/riferrei/srclient"
 
 	pb "github.com/jojohimawan/intelligent-agent-system/api"
