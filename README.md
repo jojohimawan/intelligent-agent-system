@@ -24,7 +24,7 @@ protoc \
 ```
 
 **3. Verify Kafka and Schema Registry connectivity**
-Ensure that:
+<br> Ensure that:
 - Kafka broker is running and accessible.
 - Schema Registry is up and reachable.
 
@@ -42,5 +42,5 @@ go run cmd/server/main.go
 
 > _Authored by Jordan Himawan._
 >
-> _Cyber Security Research Group, C304 - D4 Building._
+> _Cyber Security Research Group, C304 - D4 Building._ <br>
 > _Politeknik Elektronika Negeri Surabaya._
