@@ -17,11 +17,12 @@ type server struct {
 }
 
 func (s *server) SendLocation(ctx context.Context, req *pb.LocationRequest) (*pb.LocationResponse, error) {
-    log.Printf("Received location: lat=%.6f, lon=%.6f, ts=%d", req.Lat, req.Lon, req.Timestamp)
+    log.Printf("Received location: vin=%s, lat=%.6f, lon=%.6f, ts=%d", req.Vin, req.Lat, req.Lon, req.Timestamp)
 
 	err := s.producer.PublishLocation(ctx, req)
 	if err != nil {
 		return &pb.LocationResponse{
+        Vin: req.Vin,
         Lat: req.Lat,
         Lon: req.Lon,
         Timestamp: req.Timestamp,
@@ -31,6 +32,7 @@ func (s *server) SendLocation(ctx context.Context, req *pb.LocationRequest) (*pb
 	}
 
     return &pb.LocationResponse{
+        Vin: req.Vin,
         Lat:       req.Lat,
         Lon:       req.Lon,
         Timestamp: req.Timestamp,

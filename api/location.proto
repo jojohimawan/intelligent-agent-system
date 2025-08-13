@@ -4,17 +4,19 @@ package location;
 option go_package = "github.com/jojohimawan/intelligent-agent-system/api;api";
 
 message LocationRequest {
-    double lat = 1;
-    double lon = 2;
-    int64 timestamp = 3;
+    string vin = 1;
+    double lat = 2;
+    double lon = 3;
+    int64 timestamp = 4;
 }
 
 message LocationResponse {
-    double lat = 1;
-    double lon = 2;
-    int64 timestamp = 3;
-    bool success = 4;
-    string status = 5;
+    string vin = 1;
+    double lat = 2;
+    double lon = 3;
+    int64 timestamp = 4;
+    bool success = 5;
+    string status = 6;
 }
 
 service LocationService {

@@ -23,9 +23,10 @@ const (
 
 type LocationRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Lat           float64                `protobuf:"fixed64,1,opt,name=lat,proto3" json:"lat,omitempty"`
-	Lon           float64                `protobuf:"fixed64,2,opt,name=lon,proto3" json:"lon,omitempty"`
-	Timestamp     int64                  `protobuf:"varint,3,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	Vin           string                 `protobuf:"bytes,1,opt,name=vin,proto3" json:"vin,omitempty"`
+	Lat           float64                `protobuf:"fixed64,2,opt,name=lat,proto3" json:"lat,omitempty"`
+	Lon           float64                `protobuf:"fixed64,3,opt,name=lon,proto3" json:"lon,omitempty"`
+	Timestamp     int64                  `protobuf:"varint,4,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -60,6 +61,13 @@ func (*LocationRequest) Descriptor() ([]byte, []int) {
 	return file_api_location_proto_rawDescGZIP(), []int{0}
 }
 
+func (x *LocationRequest) GetVin() string {
+	if x != nil {
+		return x.Vin
+	}
+	return ""
+}
+
 func (x *LocationRequest) GetLat() float64 {
 	if x != nil {
 		return x.Lat
@@ -83,11 +91,12 @@ func (x *LocationRequest) GetTimestamp() int64 {
 
 type LocationResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Lat           float64                `protobuf:"fixed64,1,opt,name=lat,proto3" json:"lat,omitempty"`
-	Lon           float64                `protobuf:"fixed64,2,opt,name=lon,proto3" json:"lon,omitempty"`
-	Timestamp     int64                  `protobuf:"varint,3,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
-	Success       bool                   `protobuf:"varint,4,opt,name=success,proto3" json:"success,omitempty"`
-	Status        string                 `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
+	Vin           string                 `protobuf:"bytes,1,opt,name=vin,proto3" json:"vin,omitempty"`
+	Lat           float64                `protobuf:"fixed64,2,opt,name=lat,proto3" json:"lat,omitempty"`
+	Lon           float64                `protobuf:"fixed64,3,opt,name=lon,proto3" json:"lon,omitempty"`
+	Timestamp     int64                  `protobuf:"varint,4,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	Success       bool                   `protobuf:"varint,5,opt,name=success,proto3" json:"success,omitempty"`
+	Status        string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -120,6 +129,13 @@ func (x *LocationResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use LocationResponse.ProtoReflect.Descriptor instead.
 func (*LocationResponse) Descriptor() ([]byte, []int) {
 	return file_api_location_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *LocationResponse) GetVin() string {
+	if x != nil {
+		return x.Vin
+	}
+	return ""
 }
 
 func (x *LocationResponse) GetLat() float64 {
@@ -161,17 +177,19 @@ var File_api_location_proto protoreflect.FileDescriptor
 
 const file_api_location_proto_rawDesc = "" +
 	"\n" +
-	"\x12api/location.proto\x12\blocation\"S\n" +
+	"\x12api/location.proto\x12\blocation\"e\n" +
 	"\x0fLocationRequest\x12\x10\n" +
-	"\x03lat\x18\x01 \x01(\x01R\x03lat\x12\x10\n" +
-	"\x03lon\x18\x02 \x01(\x01R\x03lon\x12\x1c\n" +
-	"\ttimestamp\x18\x03 \x01(\x03R\ttimestamp\"\x86\x01\n" +
+	"\x03vin\x18\x01 \x01(\tR\x03vin\x12\x10\n" +
+	"\x03lat\x18\x02 \x01(\x01R\x03lat\x12\x10\n" +
+	"\x03lon\x18\x03 \x01(\x01R\x03lon\x12\x1c\n" +
+	"\ttimestamp\x18\x04 \x01(\x03R\ttimestamp\"\x98\x01\n" +
 	"\x10LocationResponse\x12\x10\n" +
-	"\x03lat\x18\x01 \x01(\x01R\x03lat\x12\x10\n" +
-	"\x03lon\x18\x02 \x01(\x01R\x03lon\x12\x1c\n" +
-	"\ttimestamp\x18\x03 \x01(\x03R\ttimestamp\x12\x18\n" +
-	"\asuccess\x18\x04 \x01(\bR\asuccess\x12\x16\n" +
-	"\x06status\x18\x05 \x01(\tR\x06status2X\n" +
+	"\x03vin\x18\x01 \x01(\tR\x03vin\x12\x10\n" +
+	"\x03lat\x18\x02 \x01(\x01R\x03lat\x12\x10\n" +
+	"\x03lon\x18\x03 \x01(\x01R\x03lon\x12\x1c\n" +
+	"\ttimestamp\x18\x04 \x01(\x03R\ttimestamp\x12\x18\n" +
+	"\asuccess\x18\x05 \x01(\bR\asuccess\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\tR\x06status2X\n" +
 	"\x0fLocationService\x12E\n" +
 	"\fSendLocation\x12\x19.location.LocationRequest\x1a\x1a.location.LocationResponseB9Z7github.com/jojohimawan/intelligent-agent-system/api;apib\x06proto3"
 

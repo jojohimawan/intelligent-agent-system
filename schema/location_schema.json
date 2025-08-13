@@ -3,9 +3,10 @@
     "title": "Location",
     "type": "object",
     "properties": {
+        "vin": {"type": "string"},
         "lat": {"type": "number"},
         "lon": {"type": "number"},
         "timestamp": {"type": "integer"}
     },
-    "required": ["lat", "lon", "timestamp"]
+    "required": ["vin", "lat", "lon", "timestamp"]
 }
