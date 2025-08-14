@@ -8,40 +8,11 @@ import (
 
 	pb "github.com/jojohimawan/intelligent-agent-system/api"
     kafka "github.com/jojohimawan/intelligent-agent-system/internal/kafka"
+    grpcServer "github.com/jojohimawan/intelligent-agent-system/internal/server"
     "github.com/jojohimawan/intelligent-agent-system/internal/data"
 
 	"google.golang.org/grpc"
 )
-
-type server struct {
-	pb.UnimplementedLocationServiceServer
-    producer *kafka.Producer
-}
-
-func (s *server) SendLocation(ctx context.Context, req *pb.LocationRequest) (*pb.LocationResponse, error) {
-    log.Printf("Received location: vin=%s, lat=%.6f, lon=%.6f, ts=%d", req.Vin, req.Lat, req.Lon, req.Timestamp)
-
-	err := s.producer.PublishLocation(ctx, req)
-	if err != nil {
-		return &pb.LocationResponse{
-        Vin: req.Vin,
-        Lat: req.Lat,
-        Lon: req.Lon,
-        Timestamp: req.Timestamp,
-        Success: false,
-        Status: "kafka_error",
-   		}, nil
-	}
-
-    return &pb.LocationResponse{
-        Vin: req.Vin,
-        Lat:       req.Lat,
-        Lon:       req.Lon,
-        Timestamp: req.Timestamp,
-        Success:   true,
-        Status:    "processed",
-    }, nil
-}
 
 func main() {
 	kafkaProducer, err := kafka.NewProducer(
@@ -60,10 +31,8 @@ func main() {
         log.Fatalf("Failed to listen: %v", err)
     }
 
-    grpcServer := grpc.NewServer()
-    pb.RegisterLocationServiceServer(grpcServer, &server{
-        producer: kafkaProducer,
-    })
+    grpcSrv := grpc.NewServer()
+    pb.RegisterLocationServiceServer(grpcSrv, grpcServer.NewLocationServer(kafkaProducer))
 
     locations, err := data.LoadDummyLocations("dummy/vehicle_locations.csv")
     if err != nil {
@@ -84,7 +53,7 @@ func main() {
     }()
 
     log.Println("gRPC server running on port 50051")
-    if err := grpcServer.Serve(lis); err != nil {
+    if err := grpcSrv.Serve(lis); err != nil {
         log.Fatalf("Failed to serve: %v", err)
     }
 }
