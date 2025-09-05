@@ -10,10 +10,13 @@ require (
 )
 
 require (
+	github.com/adrianmo/go-nmea v1.10.0 // indirect
+	github.com/creack/goselect v0.1.2 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/linkedin/goavro/v2 v2.13.1 // indirect
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.0 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
+	go.bug.st/serial v1.6.4 // indirect
 	golang.org/x/net v0.40.0 // indirect
 	golang.org/x/sync v0.14.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
