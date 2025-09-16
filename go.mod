@@ -10,11 +10,13 @@ require (
 )
 
 require (
+	github.com/Netflix/go-env v0.1.2 // indirect
 	github.com/adrianmo/go-nmea v1.10.0 // indirect
 	github.com/creack/goselect v0.1.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/jhump/protoreflect v1.12.0 // indirect
+	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/linkedin/goavro/v2 v2.13.1 // indirect
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.0 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
