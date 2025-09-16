@@ -4,24 +4,28 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
+	"time"
 
-	// "context"
-	// "net"
-	// "time"
-
-	// pb "github.com/jojohimawan/intelligent-agent-system/api"
-	// kafka "github.com/jojohimawan/intelligent-agent-system/internal/kafka"
-	// grpcServer "github.com/jojohimawan/intelligent-agent-system/internal/server"
-	// "github.com/jojohimawan/intelligent-agent-system/internal/data"
-
-	// "google.golang.org/grpc"
+	pb "github.com/jojohimawan/intelligent-agent-system/api"
+	kafka "github.com/jojohimawan/intelligent-agent-system/internal/kafka"
 
 	"github.com/adrianmo/go-nmea"
 	"go.bug.st/serial"
 )
 
 func main() {
+	kafkaProducer, err := kafka.NewProducer(
+		"10.10.10.203:9092",
+		"http://10.10.10.203:8085",
+		"vehicle-location",
+	)
+	if err != nil {
+		log.Fatalf("Failed to connect to Kafka: %v", err)
+	}
+	defer kafkaProducer.Close()
+
 	mode := &serial.Mode{
 		BaudRate: 9600,
 	}
@@ -51,7 +55,7 @@ func main() {
 				sentence := strings.TrimSpace(sentences[i])
 
 				if sentence != "" {
-					fmt.Printf(sentence)
+					fmt.Printf("%s", sentence)
 					fmt.Printf("\n")
 
 					s, err := nmea.Parse(sentence)
@@ -66,6 +70,27 @@ func main() {
 						fmt.Printf("Latitude GPS: %s\n", nmea.FormatGPS(m.Latitude))
 						fmt.Printf("Longitude GPS: %s\n", nmea.FormatGPS(m.Longitude))
 						fmt.Printf("Date: %s\n", m.Date)
+
+						floated_latitude, err := strconv.ParseFloat(nmea.FormatGPS(m.Latitude), 64)
+						if err != nil {
+							log.Fatalf("Failed to convert latitude to float64: %v", err)
+						}
+
+						floated_longitude, err := strconv.ParseFloat(nmea.FormatGPS(m.Longitude), 64)
+						if err != nil {
+							log.Fatalf("Failed to convert longitude to float64: %v", err)
+						}
+
+						var location *pb.LocationRequest = &pb.LocationRequest{
+							Vin:       "4S4BRDLC3B2413966",
+							Lat:       floated_latitude,
+							Lon:       floated_longitude,
+							Timestamp: time.Now().Unix(),
+						}
+
+						if err := kafkaProducer.PublishLocation(location); err != nil {
+							log.Printf("Kafka publish error: %v", err)
+						}
 					}
 				}
 			}
@@ -73,45 +98,4 @@ func main() {
 			buffer = sentences[len(sentences)-1]
 		}
 	}
-	// kafkaProducer, err := kafka.NewProducer(
-	// 	"10.10.10.203:9092",
-	// 	"http://10.10.10.203:8085",
-	// 	"vehicle-location",
-	// 	"./schema/location_schema.json",
-	// )
-	// if err != nil {
-	// 	log.Fatalf("Failed to connect to Kafka: %v", err)
-	// }
-	// defer kafkaProducer.Close()
-
-	// lis, err := net.Listen("tcp", ":50051")
-	// if err != nil {
-	//     log.Fatalf("Failed to listen: %v", err)
-	// }
-
-	// grpcSrv := grpc.NewServer()
-	// pb.RegisterLocationServiceServer(grpcSrv, grpcServer.NewLocationServer(kafkaProducer))
-
-	// locations, err := data.LoadDummyLocations("dummy/vehicle_locations.csv")
-	// if err != nil {
-	//     log.Fatalf("Failed to load CSV: %v", err)
-	// }
-
-	// go func() {
-	//     ctx := context.Background()
-
-	//     for index, loc := range locations {
-	//         log.Printf("Publishing Row %d of VIN=%s to Kafka. lat=%.6f, lon=%.6f, ts=%d", index, loc.Vin, loc.Lat, loc.Lon, loc.Timestamp,)
-	//         if err := kafkaProducer.PublishLocation(ctx, loc); err != nil {
-	//             log.Printf("Kafka publish error: %v", err)
-	//         }
-
-	//         time.Sleep(3 * time.Second)
-	//     }
-	// }()
-
-	// log.Println("gRPC server running on port 50051")
-	// if err := grpcSrv.Serve(lis); err != nil {
-	//     log.Fatalf("Failed to serve: %v", err)
-	// }
 }

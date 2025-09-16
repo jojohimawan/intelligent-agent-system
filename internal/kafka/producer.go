@@ -2,25 +2,24 @@ package kafka
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"log"
-	"os"
 
 	ckafka "github.com/confluentinc/confluent-kafka-go/kafka"
-	srclient "github.com/riferrei/srclient"
+	"github.com/confluentinc/confluent-kafka-go/schemaregistry"
+	"github.com/confluentinc/confluent-kafka-go/schemaregistry/serde"
+	"github.com/confluentinc/confluent-kafka-go/schemaregistry/serde/protobuf"
 
 	pb "github.com/jojohimawan/intelligent-agent-system/api"
 )
 
 type Producer struct {
-	kafkaProducer *ckafka.Producer
-	schemaRegistryClient *srclient.SchemaRegistryClient
-	topic string
-	schemaID int
+	kafkaProducer        *ckafka.Producer
+	schemaRegistryClient schemaregistry.Client
+	protobufSerde        *protobuf.Serializer
+	topic                string
 }
 
-func NewProducer(broker, schemaRegistryURL, topic, jsonSchemaPath string) (*Producer, error) {
+func NewProducer(broker, schemaRegistryURL, topic string) (*Producer, error) {
 	p, err := ckafka.NewProducer(&ckafka.ConfigMap{
 		"bootstrap.servers": broker,
 	})
@@ -28,52 +27,48 @@ func NewProducer(broker, schemaRegistryURL, topic, jsonSchemaPath string) (*Prod
 		return nil, fmt.Errorf("Failed to create producer: %w", err)
 	}
 
-	src := srclient.NewSchemaRegistryClient(schemaRegistryURL)
-
-	schemaBytes, err := os.ReadFile(jsonSchemaPath)
+	src, err := schemaregistry.NewClient(
+		schemaregistry.NewConfig(schemaRegistryURL),
+	)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to read JSON schema: %w", err)
+		return nil, fmt.Errorf("failed to create schema registry client: %w", err)
 	}
 
-	subject := topic + "-value"
+	serdeConfig := protobuf.NewSerializerConfig()
+	serdeConfig.AutoRegisterSchemas = true
+	serdeConfig.UseLatestVersion = true
 
-	schema, err := src.GetLatestSchema(subject)
-    if err != nil {
-        log.Printf("Schema not found for subject %s, registering new...", subject)
-        schema, err = src.CreateSchema(subject, string(schemaBytes), srclient.Json)
-        if err != nil {
-            return nil, fmt.Errorf("failed to register schema: %w", err)
-        }
-        log.Printf("Registered schema ID %d for subject %s", schema.ID(), subject)
-    } else {
-        log.Printf("Found existing schema ID %d for subject %s", schema.ID(), subject)
-    }
+	serializer, err := protobuf.NewSerializer(src, serde.ValueSerde, serdeConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create protobuf serializer: %w", err)
+	}
 
 	return &Producer{
-		kafkaProducer: p,
+		kafkaProducer:        p,
 		schemaRegistryClient: src,
-		topic: topic,
-		schemaID: schema.ID(),
+		topic:                topic,
+		protobufSerde:        serializer,
 	}, nil
 }
 
-func (p *Producer) PublishLocation(ctx context.Context, loc *pb.LocationRequest) error {
-	payload, err := json.Marshal(loc)
+func (p *Producer) PublishLocation(loc *pb.LocationRequest, option ...context.Context) error {
+	serializedPayload, err := p.protobufSerde.Serialize(p.topic, loc)
 	if err != nil {
-		return fmt.Errorf("Failed to marshal JSON: %w", err)
+		return fmt.Errorf("failed to serialize protobuf message: %w", err)
 	}
 
-	msgBytes := make([]byte, 5+len(payload))
-	msgBytes[0] = 0
-    msgBytes[1] = byte(p.schemaID >> 24)
-    msgBytes[2] = byte(p.schemaID >> 16)
-    msgBytes[3] = byte(p.schemaID >> 8)
-    msgBytes[4] = byte(p.schemaID)
-    copy(msgBytes[5:], payload)
-
 	return p.kafkaProducer.Produce(&ckafka.Message{
-		TopicPartition: ckafka.TopicPartition{Topic: &p.topic, Partition: ckafka.PartitionAny},
-		Value: msgBytes,
+		TopicPartition: ckafka.TopicPartition{
+			Topic:     &p.topic,
+			Partition: ckafka.PartitionAny,
+		},
+		Value: serializedPayload,
+		Headers: []ckafka.Header{
+			{
+				Key:   "content-type",
+				Value: []byte("application/x-protobuf"),
+			},
+		},
 	}, nil)
 }
 

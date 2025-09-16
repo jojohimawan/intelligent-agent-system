@@ -10,15 +10,3 @@ message LocationRequest {
     int64 timestamp = 4;
 }
 
-message LocationResponse {
-    string vin = 1;
-    double lat = 2;
-    double lon = 3;
-    int64 timestamp = 4;
-    bool success = 5;
-    string status = 6;
-}
-
-service LocationService {
-    rpc SendLocation(LocationRequest) returns (LocationResponse);
-}

@@ -12,7 +12,9 @@ require (
 require (
 	github.com/adrianmo/go-nmea v1.10.0 // indirect
 	github.com/creack/goselect v0.1.2 // indirect
+	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
+	github.com/jhump/protoreflect v1.12.0 // indirect
 	github.com/linkedin/goavro/v2 v2.13.1 // indirect
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.0 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
@@ -21,5 +23,6 @@ require (
 	golang.org/x/sync v0.14.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/text v0.25.0 // indirect
+	google.golang.org/genproto v0.0.0-20220503193339-ba3ae3f07e29 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250528174236-200df99c418a // indirect
 )
