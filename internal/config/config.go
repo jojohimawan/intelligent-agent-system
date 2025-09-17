@@ -11,6 +11,7 @@ import (
 type Config struct {
 	KafkaBrokerURL            string `env:"KAFKA_BROKER_URL,required=true"`
 	SchemaRegistryURL         string `env:"SCHEMA_REGISTRY_URL,required=true"`
+	SerialPort                string `env:"SERIAL_PORT,required=true"`
 	KafkaTopicVehicleLocation string `env:"KAFKA_TOPIC_VEHICLE_LOCATION,default=vehicle-location"`
 
 	Environment string `env:"APP_ENV,default=development"`
@@ -29,9 +30,9 @@ func Load() (*Config, error) {
 
 	extras, err := env.UnmarshalFromEnviron(&cfg)
 	if err != nil {
+		log.Fatal("Failed to unmarshal environment variables: %w", err)
 		return nil, err
 	}
-
 	cfg.Extras = extras
 
 	return &cfg, nil

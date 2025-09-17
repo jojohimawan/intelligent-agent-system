@@ -9,6 +9,7 @@ import (
 	"time"
 
 	pb "github.com/jojohimawan/intelligent-agent-system/api"
+	"github.com/jojohimawan/intelligent-agent-system/internal/config"
 	kafka "github.com/jojohimawan/intelligent-agent-system/internal/kafka"
 
 	"github.com/adrianmo/go-nmea"
@@ -16,10 +17,15 @@ import (
 )
 
 func main() {
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatalf("Failed to load config: %v", err)
+	}
+
 	kafkaProducer, err := kafka.NewProducer(
-		"10.10.10.203:9092",
-		"http://10.10.10.203:8085",
-		"vehicle-location",
+		cfg.KafkaBrokerURL,
+		cfg.SchemaRegistryURL,
+		cfg.KafkaTopicVehicleLocation,
 	)
 	if err != nil {
 		log.Fatalf("Failed to connect to Kafka: %v", err)
@@ -30,7 +36,7 @@ func main() {
 		BaudRate: 9600,
 	}
 
-	port, err := serial.Open("/dev/ttyACM0", mode)
+	port, err := serial.Open(cfg.SerialPort, mode)
 	if err != nil {
 		log.Fatal(err)
 	}
