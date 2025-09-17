@@ -3,6 +3,8 @@
 This module is the **Kafka producer** for the _Intelligent Agent System_ layer of the **CReATE Fleet Management System.** It is designed to run on a **System on Module (SoM)** embedded in a vehicle, where it collects sensor and telemetry data and publishes it to Kafka. Downstream services can then consume this data for further processing and analytics.
 
 ### Current Features
+- Reads data from serial port.
+- Parses NMEA sentence.
 - Publishes data to Kafka topics.
 - Supports Protocol Buffers.
 - Integrates with Schema Registry.
@@ -43,4 +45,6 @@ go run cmd/server/main.go
 > _Authored by Jordan Himawan._
 >
 > _Cyber Security Research Group, C304 - D4 Building._ <br>
-> _Politeknik Elektronika Negeri Surabaya._
+> _Politeknik Elektronika Negeri Surabaya._ <br>
+>
+> Last change: September 17th, 2025.
