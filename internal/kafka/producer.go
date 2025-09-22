@@ -22,9 +22,10 @@ type Producer struct {
 func NewProducer(broker, schemaRegistryURL, topic string) (*Producer, error) {
 	p, err := ckafka.NewProducer(&ckafka.ConfigMap{
 		"bootstrap.servers": broker,
+		"client.id":         "ias-go-producer",
 	})
 	if err != nil {
-		return nil, fmt.Errorf("Failed to create producer: %w", err)
+		return nil, fmt.Errorf("failed to create producer: %w", err)
 	}
 
 	src, err := schemaregistry.NewClient(
