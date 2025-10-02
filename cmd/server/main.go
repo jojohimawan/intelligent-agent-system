@@ -65,7 +65,8 @@ func main() {
 
 					s, err := nmea.Parse(sentence)
 					if err != nil {
-						log.Fatal(err)
+						log.Printf("NMEA parse error: %v (sentence: %s)", err, sentence)
+						continue
 					}
 
 					if s.DataType() == nmea.TypeRMC {
@@ -75,16 +76,6 @@ func main() {
 						fmt.Printf("Latitude GPS: %f\n", m.Latitude)
 						fmt.Printf("Longitude GPS: %f\n", m.Longitude)
 						fmt.Printf("Date: %s\n", m.Date)
-
-						// floated_latitude, err := strconv.ParseFloat(nmea.FormatGPS(m.Latitude), 64)
-						// if err != nil {
-						// 	log.Fatalf("Failed to convert latitude to float64: %v", err)
-						// }
-
-						// floated_longitude, err := strconv.ParseFloat(nmea.FormatGPS(m.Longitude), 64)
-						// if err != nil {
-						// 	log.Fatalf("Failed to convert longitude to float64: %v", err)
-						// }
 
 						var location *pb.LocationRequest = &pb.LocationRequest{
 							Vin:       "4S4BRDLC3B2413966",
