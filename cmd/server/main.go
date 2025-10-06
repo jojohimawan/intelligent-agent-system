@@ -1,18 +1,13 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
+	"context"
 	"log"
-	"strings"
-	"time"
 
-	pb "github.com/jojohimawan/intelligent-agent-system/api"
 	"github.com/jojohimawan/intelligent-agent-system/internal/config"
-	kafka "github.com/jojohimawan/intelligent-agent-system/internal/kafka"
-
-	"github.com/adrianmo/go-nmea"
-	"go.bug.st/serial"
+	"github.com/jojohimawan/intelligent-agent-system/internal/kafka"
+	"github.com/jojohimawan/intelligent-agent-system/internal/pipeline"
+	"github.com/jojohimawan/intelligent-agent-system/internal/serial"
 )
 
 func main() {
@@ -31,67 +26,14 @@ func main() {
 	}
 	defer kafkaProducer.Close()
 
-	mode := &serial.Mode{
-		BaudRate: 9600,
-	}
-
-	port, err := serial.Open(cfg.SerialPort, mode)
+	sr, err := serial.Open(cfg.SerialPort, 9600)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("failed to open serial port %s: %v", cfg.SerialPort, err)
 	}
-	defer port.Close()
+	defer sr.Close()
 
-	reader := bufio.NewReader(port)
-	var buffer string
-
-	for {
-		data, err := reader.ReadString('\n')
-		if err != nil {
-			log.Fatal(err)
-			continue
-		}
-
-		buffer += data
-
-		if strings.Contains(buffer, "\n") {
-			sentences := strings.Split(buffer, "\n")
-
-			for i := 0; i < len(sentences)-1; i++ {
-				sentence := strings.TrimSpace(sentences[i])
-
-				if sentence != "" {
-					fmt.Printf("%s", sentence)
-					fmt.Printf("\n")
-
-					s, err := nmea.Parse(sentence)
-					if err != nil {
-						log.Printf("NMEA parse error: %v (sentence: %s)", err, sentence)
-						continue
-					}
-
-					if s.DataType() == nmea.TypeRMC {
-						m := s.(nmea.RMC)
-						fmt.Printf("Time: %s\n", m.Time)
-						fmt.Printf("Validity: %s\n", m.Validity)
-						fmt.Printf("Latitude GPS: %f\n", m.Latitude)
-						fmt.Printf("Longitude GPS: %f\n", m.Longitude)
-						fmt.Printf("Date: %s\n", m.Date)
-
-						var location *pb.LocationRequest = &pb.LocationRequest{
-							Vin:       "4S4BRDLC3B2413966",
-							Lat:       m.Latitude,
-							Lon:       m.Longitude,
-							Timestamp: time.Now().Unix(),
-						}
-
-						if err := kafkaProducer.PublishLocation(location); err != nil {
-							log.Printf("Kafka publish error: %v", err)
-						}
-					}
-				}
-			}
-
-			buffer = sentences[len(sentences)-1]
-		}
+	ctx := context.Background()
+	if err := pipeline.Run(ctx, sr, kafkaProducer); err != nil {
+		log.Fatalf("pipeline error: %v", err)
 	}
 }

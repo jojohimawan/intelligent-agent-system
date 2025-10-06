@@ -8,6 +8,7 @@ This module is the **Kafka producer** for the _Intelligent Agent System_ layer o
 - Publishes data to Kafka topics.
 - Supports Protocol Buffers.
 - Integrates with Schema Registry.
+- Pipeline concurrency.
 
 ### Setup
 
@@ -35,10 +36,21 @@ protoc \
 go run cmd/server/main.go
 ```
 
+### Dev Notes
+- Uses pipeline concurrency model with three independent goroutines for reading, parsing, and publishing.
+- Each stage logs recoverable errors without blocking the pipeline.
+- Additional data sources or stages can be added.
+- Graceful shutdown by context cancellation and Kafka/serial connection cleanup.
+
 ### Requirements
 - Go >= 1.24
 - Kafka Broker
 - Confluent Schema Registry
+- Serial Device (e.g. Arduino Uno, GPS module emitting NMEA sentences)
+
+### Future Developments
+- Multi-topic publishing.
+- Worker pool for Kafka publishing.
 
 <br>
 
@@ -47,4 +59,4 @@ go run cmd/server/main.go
 > _Cyber Security Research Group, C304 - D4 Building._ <br>
 > _Politeknik Elektronika Negeri Surabaya._ <br>
 >
-> Last change: September 17th, 2025.
+> Last change: October 6th, 2025.
