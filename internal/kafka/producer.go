@@ -16,7 +16,6 @@ type Producer struct {
 	kafkaProducer        *ckafka.Producer
 	schemaRegistryClient schemaregistry.Client
 	protobufSerde        *protobuf.Serializer
-	topic                string
 }
 
 func NewProducer(broker, schemaRegistryURL, topic string) (*Producer, error) {
@@ -47,20 +46,40 @@ func NewProducer(broker, schemaRegistryURL, topic string) (*Producer, error) {
 	return &Producer{
 		kafkaProducer:        p,
 		schemaRegistryClient: src,
-		topic:                topic,
 		protobufSerde:        serializer,
 	}, nil
 }
 
-func (p *Producer) PublishLocation(loc *pb.LocationRequest, option ...context.Context) error {
-	serializedPayload, err := p.protobufSerde.Serialize(p.topic, loc)
+func (p *Producer) PublishLocation(loc *pb.LocationRequest, topic *string, option ...context.Context) error {
+	serializedPayload, err := p.protobufSerde.Serialize(*topic, loc)
 	if err != nil {
 		return fmt.Errorf("failed to serialize protobuf message: %w", err)
 	}
 
 	return p.kafkaProducer.Produce(&ckafka.Message{
 		TopicPartition: ckafka.TopicPartition{
-			Topic:     &p.topic,
+			Topic:     topic,
+			Partition: ckafka.PartitionAny,
+		},
+		Value: serializedPayload,
+		Headers: []ckafka.Header{
+			{
+				Key:   "content-type",
+				Value: []byte("application/x-protobuf"),
+			},
+		},
+	}, nil)
+}
+
+func (p *Producer) PublishOBD(obd *pb.VehicleOBD, topic *string, option ...context.Context) error {
+	serializedPayload, err := p.protobufSerde.Serialize(*topic, obd)
+	if err != nil {
+		return fmt.Errorf("failed to serialize protobuf message: %w", err)
+	}
+
+	return p.kafkaProducer.Produce(&ckafka.Message{
+		TopicPartition: ckafka.TopicPartition{
+			Topic:     topic,
 			Partition: ckafka.PartitionAny,
 		},
 		Value: serializedPayload,

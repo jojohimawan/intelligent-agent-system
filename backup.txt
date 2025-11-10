@@ -1,0 +1,240 @@
+package main
+
+import (
+	// "context"
+	// "log"
+
+	// "github.com/jojohimawan/intelligent-agent-system/internal/config"
+	// "github.com/jojohimawan/intelligent-agent-system/internal/kafka"
+	// "github.com/jojohimawan/intelligent-agent-system/internal/pipeline"
+	// "github.com/jojohimawan/intelligent-agent-system/internal/serial"
+
+	"context"
+	"fmt"
+	"log"
+
+	bit11can "github.com/jojohimawan/intelligent-agent-system/internal/gen/obd2"
+	"go.einride.tech/can"
+	"go.einride.tech/can/pkg/socketcan"
+)
+
+func main() {
+
+	// defineSignals()
+
+	conn, _ := socketcan.DialContext(context.Background(), "can", "vcan0")
+
+	recv := socketcan.NewReceiver(conn)
+	msg := bit11can.NewOBD2()
+	for recv.Receive() {
+		frame := recv.Frame()
+		fmt.Printf("Received frame: %s\n", frame.String())
+
+		if err := recv.Err(); err != nil {
+			log.Fatalf("receiver error: %v", err)
+		}
+
+		if frame.ID < 0x7E8 || frame.ID > 0x7EF {
+			continue
+		}
+
+		err := decodeOBD2Frame(frame, msg)
+		if err != nil {
+			fmt.Println(err)
+		}
+		// if len(frame.Data) < 3 {
+		// 	fmt.Errorf("frame too short")
+		// 	continue
+		// }
+
+		// pid := frame.Data[2]
+		// fmt.Printf("pid: %d\n", pid)
+		// result := make(map[string]float64)
+
+		// switch pid {
+		// case 0x0C:
+		// 	if len(frame.Data) < 5 {
+		// 		fmt.Errorf("rpm frame too short")
+		// 		continue
+		// 	}
+
+		// 	A := frame.Data[3]
+		// 	B := frame.Data[4]
+		// 	rpm := float64(((256 * uint16(A)) + uint16(B)) / 4)
+		// 	result["rpm"] = rpm
+		// case 0x0D:
+		// 	if len(frame.Data) < 4 {
+		// 		fmt.Errorf("speed frame too short")
+		// 		continue
+		// 	}
+
+		// 	speed := float64(frame.Data[3])
+		// 	result["speed"] = speed
+		// default:
+		// 	continue
+		// }
+
+		// fmt.Printf("Decoded data: %+v\n", result)
+	}
+
+	// cfg, err := config.Load()
+	// if err != nil {
+	// 	log.Fatalf("Failed to load config: %v", err)
+	// }
+
+	// kafkaProducer, err := kafka.NewProducer(
+	// 	cfg.KafkaBrokerURL,
+	// 	cfg.SchemaRegistryURL,
+	// 	cfg.KafkaTopicVehicleLocation,
+	// )
+	// if err != nil {
+	// 	log.Fatalf("Failed to connect to Kafka: %v", err)
+	// }
+	// defer kafkaProducer.Close()
+
+	// sr, err := serial.Open(cfg.SerialPort, 9600)
+	// if err != nil {
+	// 	log.Fatalf("failed to open serial port %s: %v", cfg.SerialPort, err)
+	// }
+	// defer sr.Close()
+
+	// ctx := context.Background()
+	// if err := pipeline.Run(ctx, sr, kafkaProducer); err != nil {
+	// 	log.Fatalf("pipeline error: %v", err)
+	// }
+}
+
+func decodeOBD2Frame(frame can.Frame, msg *bit11can.OBD2) error {
+	if err := msg.UnmarshalFrame(frame); err != nil {
+		fmt.Printf("   Raw data: % X\n", frame.Data[:frame.Length])
+		return fmt.Errorf("⚠️  Failed to unmarshal frame: %v", err)
+	}
+
+	msg.Descriptor()
+
+	service := msg.Service()
+	response := msg.Response()
+	fmt.Printf("📋 Service raw: %d (0x%02X)\n", uint8(service), uint8(service))
+	fmt.Printf("📋 S01PID raw: %d (0x%02X)\n", uint8(msg.S01PID()), uint8(msg.S01PID()))
+	fmt.Printf("📋 Service: 0x%02X, Response: 0x%02X\n", service, response)
+
+	if uint8(service) != 1 {
+		return fmt.Errorf("unsupported service: 0x%02X", service)
+	}
+
+	A := frame.Data[3]
+	B := frame.Data[4]
+	rpm := float64(uint16(A)<<8|uint16(B)) / 4.0
+	fmt.Printf("🔧 Engine RPM (manual decode): %.0f\n", rpm)
+
+	return decodeMode01PID(msg)
+}
+
+func decodeMode01PID(msg *bit11can.OBD2) error {
+	pid := msg.S01PID()
+
+	fmt.Print("\nPID: ")
+	fmt.Println(pid.String())
+
+	fmt.Print("\nDescription: ")
+	fmt.Println(msg.Descriptor().Description)
+
+	fmt.Print("\nID: ")
+	fmt.Println(msg.Descriptor().ID)
+
+	fmt.Print("\nExtended: ")
+	fmt.Println(msg.Descriptor().IsExtended)
+
+	fmt.Print("\nLength: ")
+	fmt.Println(msg.Descriptor().Length)
+
+	fmt.Print("\nName: ")
+	fmt.Println(msg.Descriptor().Name)
+
+	fmt.Print("\nSend type: ")
+	fmt.Println(msg.Descriptor().SendType)
+
+	fmt.Print("\nSignals: ")
+	fmt.Println(msg.Descriptor().Signals)
+
+	fmt.Print("\nMultiplexer signal: ")
+	fmt.Println(msg.Descriptor().MultiplexerSignal())
+
+	fmt.Print("\nFrame data: ")
+	fmt.Println(msg.Frame().Data)
+
+	if pid != bit11can.OBD2_S01PID_S01PID0CEngineRPM {
+		return fmt.Errorf("unhandled Mode 01 PID: 0x%02X", pid)
+	}
+
+	rpm := msg.S01PID0C_EngineRPM()
+	fmt.Printf("RPM: %.2f\n", rpm)
+	actualRpm := float64(rpm) / 4.0
+	fmt.Printf("🔧 Engine RPM: %.0f\n", actualRpm)
+
+	return nil
+}
+
+// func printDecoded(msg interface{}) {
+// 	value := reflect.ValueOf(msg)
+// 	valueType := reflect.TypeOf(msg)
+
+// 	fmt.Println("🔍 Decoded values: ")
+
+// 	found := false
+
+// 	for i := 0; i < value.NumField(); i++ {
+// 		fmt.Println(valueType.Field(i).Name)
+// 		field := value.Field(i)
+// 		name := valueType.Field(3).Name
+
+// 		switch field.Kind() {
+// 		case reflect.Float64:
+// 			v := field.Float()
+// 			if v != 0 {
+// 				fmt.Printf("  - %-40s : %.2f\n", name, v)
+// 				found = true
+// 			}
+// 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+// 			v := field.Int()
+// 			if v != 0 {
+// 				fmt.Printf("  - %-40s : %d\n", name, v)
+// 				found = true
+// 			}
+// 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+// 			v := field.Uint()
+// 			if v != 0 {
+// 				fmt.Printf("  - %-40s : %d\n", name, v)
+// 				found = true
+// 			}
+// 		}
+// 	}
+
+// 	if !found {
+// 		fmt.Println("  (no meaningful values found)")
+// 	}
+// }
+
+func defineSignals() {
+	md := bit11can.Messages().OBD2
+	fmt.Println("=== OBD2 Signal Definitions ===")
+
+	fmt.Printf("Length Signal:\n")
+	fmt.Printf("  Start: %d, Length: %d, BigEndian: %v\n\n",
+		md.Length.Start, md.Length.Length, md.Length.IsBigEndian)
+
+	fmt.Printf("Service Signal:\n")
+	fmt.Printf("  Start: %d, Length: %d, BigEndian: %v\n\n",
+		md.Service.Start, md.Service.Length, md.Service.IsBigEndian)
+
+	fmt.Printf("S01PID Signal:\n")
+	fmt.Printf("  Start: %d, Length: %d, BigEndian: %v\n\n",
+		md.S01PID.Start, md.S01PID.Length, md.S01PID.IsBigEndian)
+
+	fmt.Printf("S01PID0C_EngineRPM Signal:\n")
+	fmt.Printf("  Start: %d, Length: %d, BigEndian: %v\n",
+		md.S01PID0C_EngineRPM.Start, md.S01PID0C_EngineRPM.Length,
+		md.S01PID0C_EngineRPM.IsBigEndian)
+	fmt.Printf("  Scale: %f, Offset: %f\n",
+		md.S01PID0C_EngineRPM.Scale, md.S01PID0C_EngineRPM.Offset)
+}

@@ -1,0 +1,235 @@
+VERSION ""
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: CReATE_ECU
+
+
+BO_ 3221225472 VECTOR__INDEPENDENT_SIG_MSG: 0 Vector__XXX
+ SG_ VESC_StatusWattHours4 : 0|32@0- (1,0) [-2147483648|2147483647] "Wh" Vector__XXX
+ SG_ VESC_StatusAmpHoursChg4 : 0|32@0- (1,0) [-2147483648|2147483647] "Ah" Vector__XXX
+ SG_ VESC_StatusAmpHoursChg4 : 0|32@0- (1,0) [-2147483648|2147483647] "Ah" Vector__XXX
+
+BO_ 2364604414 IOV_BackRightCornerMotor3: 8 Vector__XXX
+ SG_ VESC_StatusWattHoursChg4 : 39|32@0- (1,0) [-2147483648|2147483647] "Wh" Vector__XXX
+ SG_ VESC_StatusWattHours4 : 7|32@0- (1,0) [0|0] "Wh" Vector__XXX
+
+BO_ 2364669950 IOV_BackRightCornerMotor4: 8 Vector__XXX
+ SG_ VESC_StatusPIDPos4 : 56|16@0- (1,0) [-32768|32767] "" Vector__XXX
+ SG_ VESC_StatusCurrentIn4 : 39|16@0- (1,0) [-32768|32767] "" Vector__XXX
+ SG_ VESC_StatusTempMotor4 : 23|16@0- (1,0) [-32768|32767] "" Vector__XXX
+ SG_ VESC_StatusTempFET4 : 7|16@0- (1,0) [-32768|32767] "" Vector__XXX
+
+BO_ 2364600318 IOV_BackRightCornerMotor2: 8 Vector__XXX
+ SG_ VESC_StatusAmpHoursChg4 : 39|32@0- (1,0) [-2147483648|2147483647] "Ah" Vector__XXX
+ SG_ VESC_StatusAmpHours4 : 7|32@0- (1,0) [-2147483648|2147483647] "Ah" Vector__XXX
+
+BO_ 2364596222 IOV_BackRightCornerMotor1: 8 Vector__XXX
+ SG_ VESC_StatusDutyCycle4 : 55|16@0- (1,0) [-32768|32767] "%" Vector__XXX
+ SG_ VESC_StatusCurrent4 : 39|16@0- (1,0) [-32768|32767] "A" Vector__XXX
+ SG_ VESC_StatusERPM4 : 7|32@0- (1,0) [-2147483648|2147483647] "RPM" Vector__XXX
+
+BO_ 2364592126 IOV_BackLeftCornerMotor4: 8 Vector__XXX
+ SG_ VESC_StatusPIDPos3 : 55|16@0- (1,0) [-32768|32767] "" Vector__XXX
+ SG_ VESC_StatusCurrentIn3 : 39|16@0- (1,0) [0|0] "" Vector__XXX
+ SG_ VESC_StatusTempMotor3 : 23|16@0- (1,0) [-32768|32767] "" Vector__XXX
+ SG_ VESC_StatusTempFET3 : 7|16@0- (1,0) [-32768|32767] "" Vector__XXX
+
+BO_ 2364588030 IOV_BackLeftCornerMotor3: 8 Vector__XXX
+ SG_ VESC_StatusWattHoursChg3 : 39|32@0- (1,0) [-2147483648|2147483647] "Wh" Vector__XXX
+ SG_ VESC_StatusWattHours3 : 7|32@0- (1,0) [-2147483648|2147483647] "Wh" Vector__XXX
+
+BO_ 2364583934 IOV_BackLeftCornerMotor2: 8 Vector__XXX
+ SG_ VESC_StatusAmpHoursChg3 : 39|32@0- (1,0) [-2147483648|2147483647] "Ah" Vector__XXX
+ SG_ VESC_StatusAmpHours3 : 7|32@0- (1,0) [-2147483648|2147483647] "Ah" Vector__XXX
+
+BO_ 2364579838 IOV_BackLeftCornerMotor1: 8 Vector__XXX
+ SG_ VESC_StatusDutyCycle3 : 55|16@0- (1,0) [-32768|32767] "%" Vector__XXX
+ SG_ VESC_StatusCurrent3 : 39|16@0- (1,0) [-32768|32767] "A" Vector__XXX
+ SG_ VESC_StatusERPM3 : 7|32@0- (1,0) [-2147483648|2147483647] "RPM" Vector__XXX
+
+BO_ 2364575742 IOV_FrontRightCornerMotor4: 8 Vector__XXX
+ SG_ VESC_StatusPIDPos2 : 55|16@0- (1,0) [-32768|32767] "" Vector__XXX
+ SG_ VESC_StatusCurrentIn2 : 39|16@0- (1,0) [-32768|32767] "" Vector__XXX
+ SG_ VESC_StatusTempMotor2 : 23|16@0- (1,0) [-32768|32767] "" Vector__XXX
+ SG_ VESC_StatusTempFET2 : 7|16@0- (1,0) [-32768|32767] "" Vector__XXX
+
+BO_ 2364571646 IOV_FrontRightCornerMotor3: 8 Vector__XXX
+ SG_ VESC_StatusWattHoursChg2 : 39|32@0- (1,0) [-2147483648|2147483647] "Wh" Vector__XXX
+ SG_ VESC_StatusWattHours2 : 7|32@0- (1,0) [-2147483648|2147483647] "Wh" Vector__XXX
+
+BO_ 2364567550 IOV_FrontRightCornerMotor2: 8 Vector__XXX
+ SG_ VESC_StatusAmpHoursChg2 : 39|32@0- (1,0) [-2147483648|2147483647] "Ah" Vector__XXX
+ SG_ VESC_StatusAmpHours2 : 7|32@0- (1,0) [-2147483648|2147483647] "Ah" Vector__XXX
+
+BO_ 2364563454 IOV_FrontRightCornerMotor1: 8 Vector__XXX
+ SG_ VESC_StatusDutyCycle2 : 55|16@0- (1,0) [-32768|32767] "%" Vector__XXX
+ SG_ VESC_StatusCurrent2 : 39|16@0- (1,0) [-32768|32767] "A" Vector__XXX
+ SG_ VESC_StatusERPM2 : 7|32@0- (1,0) [-2147483648|2147483647] "RPM" Vector__XXX
+
+BO_ 2364540414 IVI_CornerMotorStatus: 8 Vector__XXX
+
+BO_ 2364540158 IVI_DashboardStatus: 8 Vector__XXX
+
+BO_ 2364559358 IOV_FrontLeftCornerMotor4: 8 Vector__XXX
+ SG_ VESC_StatusPIDPos1 : 55|16@0- (1,0) [-32768|32767] "" Vector__XXX
+ SG_ VESC_StatusCurrentIn1 : 39|16@0- (1,0) [-32768|32767] "" Vector__XXX
+ SG_ VESC_StatusTempMotor1 : 23|16@0- (1,0) [-32768|32767] "" Vector__XXX
+ SG_ VESC_StatusTemFET1 : 7|16@0- (1,0) [-32768|32767] "" Vector__XXX
+
+BO_ 2364555262 IOV_FrontLeftCornerMotor3: 8 Vector__XXX
+ SG_ VESC_StatusWattHoursChg1 : 39|32@0- (1,0) [-2147483648|2147483647] "Wh" Vector__XXX
+ SG_ VESC_StatusWattHours1 : 7|32@0- (1,0) [-2147483648|2147483647] "Wh" Vector__XXX
+
+BO_ 2364551166 IOV_FrontLeftCornerMotor2: 8 Vector__XXX
+ SG_ VESC_StatusAmpHoursChg1 : 39|32@0- (1,0) [-2147483648|2147483647] "Ah" Vector__XXX
+ SG_ VESC_StatusAmpHours1 : 7|32@0- (1,0) [-2147483648|2147483647] "Ah" Vector__XXX
+
+BO_ 2364547070 IOV_FrontLeftCornerMotor1: 8 Vector__XXX
+ SG_ VESC_StatusDutyCycle1 : 55|16@0- (1,0) [-32768|32767] "%" Vector__XXX
+ SG_ VESC_StatusCurrent1 : 39|16@0- (1,0) [-32768|32767] "A" Vector__XXX
+ SG_ VESC_StatusERPM1 : 7|32@0- (1,0) [-2147483648|2147483647] "RPM" Vector__XXX
+
+BO_ 2559983617 BMS_DALY_MonoCellTemp: 8 Vector__XXX
+ SG_ DALY_MonomerTemp7 : 63|8@0+ (1,40) [40|295] "��C" Vector__XXX
+ SG_ DALY_MonomerTemp6 : 55|8@0+ (1,40) [40|295] "��C" Vector__XXX
+ SG_ DALY_MonomerTemp5 : 47|8@0+ (1,40) [40|295] "��C" Vector__XXX
+ SG_ DALY_MonomerTemp4 : 39|8@0+ (1,40) [40|295] "��C" Vector__XXX
+ SG_ DALY_MonomerTemp3 : 31|8@0+ (1,40) [40|295] "��C" Vector__XXX
+ SG_ DALY_MonomerTemp2 : 23|8@0+ (1,40) [40|295] "��C" Vector__XXX
+ SG_ DALY_MonomerTemp1 : 15|8@0+ (1,40) [40|295] "��C" Vector__XXX
+ SG_ DALY_TempFrameNumber : 7|8@0+ (1,0) [0|255] "" Vector__XXX
+
+BO_ 2559918081 BMS_DALY_MonoCellVoltage: 8 Vector__XXX
+ SG_ DALY_MonomerVoltage3 : 47|16@0+ (1,0) [0|65535] "mV" Vector__XXX
+ SG_ DALY_MonomerVoltage2 : 31|16@0+ (1,0) [0|65535] "mV" Vector__XXX
+ SG_ DALY_MonomerVoltage1 : 15|16@0+ (1,0) [0|65535] "mV" Vector__XXX
+ SG_ DALY_CellFrameNumber : 7|8@0+ (1,0) [0|255] "" Vector__XXX
+
+BO_ 2559852545 BMS_DALY_StatusInformation: 8 Vector__XXX
+ SG_ DALY_DischargeCycles : 47|16@0+ (1,0) [0|65535] "" Vector__XXX
+ SG_ DALY_DigitalOutput4State : 39|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ DALY_DigitalOutput3State : 38|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ DALY_DigitalOutput2State : 37|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ DALY_DigitalOutput1State : 36|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ DALY_DigitalInput4State : 35|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ DALY_DigitalInput3State : 34|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ DALY_DigitalInput2State : 33|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ DALY_DigitalInput1State : 32|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ DALY_LoadStatus : 31|8@0+ (1,0) [0|255] "" Vector__XXX
+ SG_ DALY_ChagerStatus : 23|8@0+ (1,0) [0|255] "" Vector__XXX
+ SG_ DALY_TemperatureStatus : 15|8@0+ (1,0) [0|255] "" Vector__XXX
+ SG_ DALY_BatteryString : 7|8@0+ (1,0) [0|255] "" Vector__XXX
+
+BO_ 2559721473 BMS_DALY_RangeTemperature: 8 Vector__XXX
+ SG_ DALY_MinUnitTempCellNo : 31|8@0+ (1,0) [0|255] "" Vector__XXX
+ SG_ DALY_MaxUnitTempCellNo : 15|8@0+ (1,0) [0|255] "" Vector__XXX
+ SG_ DALY_MinMonomerTemp : 23|8@0+ (1,40) [40|295] "��C" Vector__XXX
+ SG_ DALY_MaxMonomerTemp : 7|8@0+ (1,40) [40|295] "��C" Vector__XXX
+
+BO_ 2559787009 BMS_DALY_MOSStatus: 8 Vector__XXX
+ SG_ DALY_ResidualCapacity : 39|32@0+ (1,0) [0|4294967295] "mAH" Vector__XXX
+ SG_ DALY_BMSLife : 31|8@0+ (1,0) [0|255] "cycles" Vector__XXX
+ SG_ DALY_DischargeMOSTube : 23|8@0+ (1,0) [0|255] "" Vector__XXX
+ SG_ DALY_ChargingMOSTube : 15|8@0+ (1,0) [0|255] "" Vector__XXX
+ SG_ DALY_DischargeStatus : 7|8@0+ (1,0) [0|255] "" Vector__XXX
+
+BO_ 2559655937 BMS_DALY_RangeVoltage: 8 Vector__XXX
+ SG_ DALY_MinUnitVoltageCellNo : 47|8@0+ (1,0) [0|255] "" Vector__XXX
+ SG_ DALY_MinMonomerVoltage : 31|16@0+ (1,0) [0|65535] "mV" Vector__XXX
+ SG_ DALY_MaxUnitVoltageCellNo : 23|8@0+ (1,0) [0|255] "" Vector__XXX
+ SG_ DALY_MaxMonomerVoltage : 7|16@0+ (1,0) [0|65535] "mV" Vector__XXX
+
+BO_ 2559590401 BMS_DALY_SoCStatus: 8 Vector__XXX
+ SG_ DALY_BatterySoC : 55|16@0+ (0.1,0) [0|6553.5] "%" Vector__XXX
+ SG_ DALY_BatteryCurrent : 39|16@0+ (0.1,30000) [30000|36553.5] "A" Vector__XXX
+ SG_ DALY_CollectedTotalVoltage : 23|16@0+ (0.1,0) [0|6553.5] "V" Vector__XXX
+ SG_ DALY_AccumulatedPressure : 7|16@0+ (0.1,0) [0|6553.5] "V" Vector__XXX
+
+BO_ 2566869221 OBC_Response: 8 Vector__XXX
+ SG_ OBC_Temperature : 63|8@0+ (1,-40) [-40|215] "" Vector__XXX
+ SG_ OBC_S2SwitchControlBitStatus : 55|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ OBC_ElectronicLockState : 54|3@0+ (1,0) [0|7] "" Vector__XXX
+ SG_ OBC_SocketOvheatFault : 51|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ OBC_CPSignalStatus : 50|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ OBC_CCSignalStatus : 49|2@0+ (1,0) [0|3] "" Vector__XXX
+ SG_ OBC_CoolingPumpEnable : 45|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ OBC_FanWorkingEnable : 44|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ OBC_ComOfInitialization : 43|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ OBC_WorkingStatus : 42|2@0+ (1,0) [0|3] "" Vector__XXX
+ SG_ OBC_CommunicationStatus : 40|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ OBC_OutputShortCircuit : 39|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ OBC_OutputOvercurrent : 38|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ OBC_OutputOverVoltage : 37|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ OBC_OutputUnderVoltage : 36|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ OBC_InputVoltageStatus : 35|2@0+ (1,0) [0|3] "" Vector__XXX
+ SG_ OBC_TemperatureProtection : 33|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ OBC_HardwareProtection : 32|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ OBC_OutputCurrent : 23|16@0+ (0.1,0) [0|6553.5] "A" Vector__XXX
+ SG_ OBC_OutputVoltage : 7|16@0+ (0.1,0) [0|6553.5] "V" Vector__XXX
+
+BO_ 2550588916 OBC_Command: 8 Vector__XXX
+ SG_ OBC_ControlOperatingMode : 47|8@0+ (1,0) [0|255] "" Vector__XXX
+ SG_ OBC_ControlWorkEnable : 39|8@0+ (1,0) [0|255] "" Vector__XXX
+ SG_ OBC_MaxAllowChargAmp : 23|16@0+ (0.1,0) [0|6553.5] "A" Vector__XXX
+ SG_ OBC_MaxAllwChargVolt : 7|16@0+ (0.1,0) [0|6553.5] "V" Vector__XXX
+
+
+
+CM_ BO_ 3221225472 "This is a message for not used signals, created by Vector CANdb++ DBC OLE DB Provider.";
+BA_DEF_  "BusType" STRING ;
+BA_DEF_DEF_  "BusType" "CAN";
+VAL_ 2559852545 DALY_LoadStatus 1 "Access" 0 "Disconnected" ;
+VAL_ 2559852545 DALY_ChagerStatus 1 "Connected" 0 "Disconnected" ;
+VAL_ 2559787009 DALY_DischargeStatus 2 "Discharged" 1 "Charged" 0 "Stationary" ;
+VAL_ 2566869221 OBC_S2SwitchControlBitStatus 1 "CloseUp" 0 "SwitchOff" ;
+VAL_ 2566869221 OBC_ElectronicLockState 4 "LockedFault" 3 "UnlockFault" 2 "Unlocked" 1 "Locked" 0 "InJudgment" ;
+VAL_ 2566869221 OBC_SocketOvheatFault 1 "ChargingSocketIsOverheat" 0 "Normal" ;
+VAL_ 2566869221 OBC_CPSignalStatus 1 "Normal" 0 "NoCPSignalWasDetected" ;
+VAL_ 2566869221 OBC_CCSignalStatus 3 "ResistanceDetectionError" 2 "NormalConnected" 1 "HalfConnected" 0 "NotConnected" ;
+VAL_ 2566869221 OBC_CoolingPumpEnable 1 "Open" 0 "Close" ;
+VAL_ 2566869221 OBC_FanWorkingEnable 1 "Open" 0 "Close" ;
+VAL_ 2566869221 OBC_ComOfInitialization 1 "Complete" 0 "IsNotComplete" ;
+VAL_ 2566869221 OBC_WorkingStatus 3 "StopOrStandBy" 2 "Stop" 1 "Work" 0 "Undefined" ;
+VAL_ 2566869221 OBC_CommunicationStatus 1 "ReceiveCommunicationTimeout" 0 "CommunicationIsNormal" ;
+VAL_ 2566869221 OBC_OutputShortCircuit 1 "Fault" 0 "Normal" ;
+VAL_ 2566869221 OBC_OutputOvercurrent 1 "Fault" 0 "Normal" ;
+VAL_ 2566869221 OBC_OutputOverVoltage 1 "Fault" 0 "Normal" ;
+VAL_ 2566869221 OBC_OutputUnderVoltage 1 "Fault" 0 "Normal" ;
+VAL_ 2566869221 OBC_InputVoltageStatus 3 "NoInputVoltage" 2 "InputOverVoltage" 1 "InputUnderVoltage" 0 "TheVoltageIsNormal" ;
+VAL_ 2566869221 OBC_TemperatureProtection 1 "InternalTemperatureProtection" 0 "Normal" ;
+VAL_ 2566869221 OBC_HardwareProtection 1 "HardwareProtection" 0 "Normal" ;
+VAL_ 2550588916 OBC_ControlOperatingMode 1 "HeatingModel" 0 "ChargingMode" ;
+VAL_ 2550588916 OBC_ControlWorkEnable 2 "ChargeEnd" 1 "ChargerCloseTheOutput" 0 "ChargerIsStartingtoCharge" ;
+
