@@ -103,20 +103,42 @@ func Run(
 }
 
 func ReadCanFrameLoop(ctx context.Context, sr *serial.VcanConnection, out chan<- can.Frame) {
+	type readResult struct {
+		frame can.Frame
+		err   error
+	}
+	resultCh := make(chan readResult)
+
+	go func() {
+		defer close(resultCh)
+
+		for sr.Recv.Receive() {
+			frame := sr.Recv.Frame()
+
+			if frame.ID != bit29can.Messages().OBD2.ID || !frame.IsExtended {
+				fmt.Print("Frame ID mismatch or is not extended. Skipping...")
+				continue
+			}
+
+			select {
+			case resultCh <- readResult{frame, nil}:
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+
 	for {
 		select {
 		case <-ctx.Done():
 			return
-		default:
-			for sr.Recv.Receive() {
-				frame := sr.Recv.Frame()
-
-				if frame.ID != bit29can.Messages().OBD2.ID || !frame.IsExtended {
-					continue
-				}
-
-				out <- frame
+		case frame, ok := <-resultCh:
+			if !ok {
+				return
 			}
+
+			out <- frame.frame
+
 		}
 	}
 }
@@ -126,10 +148,14 @@ func DecodeFrameLoop(ctx context.Context, in <-chan can.Frame, out chan<- *inter
 		select {
 		case <-ctx.Done():
 			return
-		case frame := <-in:
+		case frame, ok := <-in:
+			if !ok {
+				return
+			}
+
 			decodedFrame, err := internalcan.DecodeMode01PID(frame)
 			if err != nil {
-				fmt.Println("%v", err)
+				fmt.Printf("%v", err)
 				continue
 			}
 
@@ -143,10 +169,14 @@ func ParseFrameLoop(ctx context.Context, in <-chan *internalcan.OBD2, out chan<-
 		select {
 		case <-ctx.Done():
 			return
-		case decodedFrame := <-in:
+		case decodedFrame, ok := <-in:
+			if !ok {
+				return
+			}
+
 			parsedMsg, err := internalcan.MessageToOBD("4S4BRDLC3B2413966", decodedFrame)
 			if err != nil {
-				fmt.Println("%v", err)
+				fmt.Printf("%v", err)
 				continue
 			}
 
@@ -162,7 +192,11 @@ func PublishFrameLoop(ctx context.Context, producer *kafka.Producer, in <-chan *
 		select {
 		case <-ctx.Done():
 			return
-		case parsedMsg := <-in:
+		case parsedMsg, ok := <-in:
+			if !ok {
+				return
+			}
+
 			if err := producer.PublishOBD(parsedMsg, &topic); err != nil {
 				log.Printf("Kafka publish error: %v", err)
 			}
@@ -176,16 +210,21 @@ func ReadSerialLoop(ctx context.Context, sr *serial.SerialReader, out chan<- str
 		return
 	}
 
-	var buffer string
+	type readResult struct {
+		line string
+		err  error
+	}
+	resultCh := make(chan readResult)
 
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		default:
+	go func() {
+		defer close(resultCh)
+
+		var buffer string
+
+		for {
 			line, err := sr.ReadLine()
 			if err != nil {
-				log.Printf("serial read error: %v", err)
+				resultCh <- readResult{"", err}
 				continue
 			}
 
@@ -197,12 +236,34 @@ func ReadSerialLoop(ctx context.Context, sr *serial.SerialReader, out chan<- str
 				for i := 0; i < len(parts)-1; i++ {
 					s := strings.TrimSpace(parts[i])
 					if s != "" {
-						out <- s
+						select {
+						case resultCh <- readResult{s, nil}:
+						case <-ctx.Done():
+							return
+						}
 					}
 				}
 
 				buffer = parts[len(parts)-1]
 			}
+		}
+
+	}()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case res, ok := <-resultCh:
+			if !ok {
+				return
+			}
+
+			if res.err != nil {
+				log.Printf("serial read error: %v", res.err)
+			}
+
+			out <- res.line
 		}
 	}
 }

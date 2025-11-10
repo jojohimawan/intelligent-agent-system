@@ -65,9 +65,9 @@ cansend vcan0 98DAF115#04410C1770000000
 ### Debts
 - ~~Multi-topic publishing.~~
 - Worker pool for Kafka publishing.
-- Graceful shutdown.
-- VCAN connection cleanup.
-- VCAN connection error handling.
+- ~~Graceful shutdown~~.
+- ~~VCAN connection cleanup~~.
+- ~~VCAN connection error handling~~.
 - Environment variables adjustment.
 
 <br>
@@ -77,4 +77,4 @@ cansend vcan0 98DAF115#04410C1770000000
 > _Cyber Security Research Group, C304 - D4 Building._ <br>
 > _Politeknik Elektronika Negeri Surabaya._ <br>
 >
-> Last change: October 6th, 2025.
+> Last change: November 10th, 2025.

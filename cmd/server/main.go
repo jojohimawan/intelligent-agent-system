@@ -1,14 +1,6 @@
 package main
 
 import (
-	// "context"
-	// "log"
-
-	// "github.com/jojohimawan/intelligent-agent-system/internal/config"
-	// "github.com/jojohimawan/intelligent-agent-system/internal/kafka"
-	// "github.com/jojohimawan/intelligent-agent-system/internal/pipeline"
-	// "github.com/jojohimawan/intelligent-agent-system/internal/serial"
-
 	"context"
 	"fmt"
 	"log"
@@ -41,14 +33,13 @@ func main() {
 
 	sr, err := serial.Open(cfg.SerialPort, 9600)
 	if err != nil {
-		// log.Fatalf("failed to open serial port %s: %v", cfg.SerialPort, err)
-		fmt.Println("failed to open serial port %s: %v", cfg.SerialPort, err)
+		fmt.Printf("failed to open serial port %s: %v", cfg.SerialPort, err)
 	}
 	defer sr.Close()
 
 	sv, err := serial.Connect(ctx, "can", "vcan0")
 	if err != nil {
-		fmt.Println("failed to open serial port %s: %v", "vcan0", err)
+		fmt.Printf("failed to open serial port %s: %v", "vcan0", err)
 	}
 	defer sv.Close()
 
