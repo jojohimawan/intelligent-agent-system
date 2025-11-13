@@ -10,6 +10,7 @@ import (
 	"sync"
 	"syscall"
 
+	"ev-gitlab.mataelang.net/ev-connect/create-ias/can.git"
 	pb "github.com/jojohimawan/intelligent-agent-system/api"
 	internalcan "github.com/jojohimawan/intelligent-agent-system/internal/can"
 	bit29can "github.com/jojohimawan/intelligent-agent-system/internal/can/gen"
@@ -17,7 +18,6 @@ import (
 	"github.com/jojohimawan/intelligent-agent-system/internal/nmea"
 	"github.com/jojohimawan/intelligent-agent-system/internal/serial"
 	"github.com/jojohimawan/intelligent-agent-system/internal/util"
-	"go.einride.tech/can"
 )
 
 func Run(

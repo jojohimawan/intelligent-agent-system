@@ -11,13 +11,13 @@ import (
 	"sync"
 	"time"
 
-	"go.einride.tech/can"
-	"go.einride.tech/can/pkg/candebug"
-	"go.einride.tech/can/pkg/canrunner"
-	"go.einride.tech/can/pkg/cantext"
-	"go.einride.tech/can/pkg/descriptor"
-	"go.einride.tech/can/pkg/generated"
-	"go.einride.tech/can/pkg/socketcan"
+	"ev-gitlab.mataelang.net/ev-connect/create-ias/can.git"
+	"ev-gitlab.mataelang.net/ev-connect/create-ias/can.git/pkg/candebug"
+	"ev-gitlab.mataelang.net/ev-connect/create-ias/can.git/pkg/canrunner"
+	"ev-gitlab.mataelang.net/ev-connect/create-ias/can.git/pkg/cantext"
+	"ev-gitlab.mataelang.net/ev-connect/create-ias/can.git/pkg/descriptor"
+	"ev-gitlab.mataelang.net/ev-connect/create-ias/can.git/pkg/generated"
+	"ev-gitlab.mataelang.net/ev-connect/create-ias/can.git/pkg/socketcan"
 )
 
 // prevent unused imports

@@ -3,8 +3,8 @@ package can
 import (
 	"fmt"
 
+	"ev-gitlab.mataelang.net/ev-connect/create-ias/can.git"
 	bit29can "github.com/jojohimawan/intelligent-agent-system/internal/can/gen"
-	"go.einride.tech/can"
 )
 
 type OBD2 struct {

@@ -4,7 +4,7 @@ import (
 	"context"
 	"net"
 
-	"go.einride.tech/can/pkg/socketcan"
+	"ev-gitlab.mataelang.net/ev-connect/create-ias/can.git/pkg/socketcan"
 )
 
 type VcanConnection struct {
