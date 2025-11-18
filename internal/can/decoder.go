@@ -5,146 +5,245 @@ import (
 
 	"ev-gitlab.mataelang.net/ev-connect/create-ias/can.git"
 	bit29can "github.com/jojohimawan/intelligent-agent-system/internal/can/gen"
+	j1939 "github.com/jojohimawan/intelligent-agent-system/internal/can/gen/j1939"
 )
 
-type OBD2 struct {
-	message *bit29can.OBD2
-	service byte
-	pid     byte
-	param   string
-	value   float64
-	unit    string
+type DecodedSignal struct {
+	source string
+	param  string
+	value  float64
+	unit   string
 }
 
-func DecodeMode01PID(frame can.Frame) (*OBD2, error) {
-	if frame.ID != bit29can.Messages().OBD2.ID || !frame.IsExtended {
-		fmt.Printf("Unknown frame ID or frame is not extended. Skipping...")
-		return nil, fmt.Errorf("Unknown frame ID or frame is not extended. Skipping...")
+type OBD2Extractor func(*bit29can.OBD2) (float64, string, string)
+type J1939Extractor func(can.Frame) ([]*DecodedSignal, error)
+
+type Decoder struct {
+	obd2Handlers  map[bit29can.OBD2_S01PID]OBD2Extractor
+	j1939Handlers map[uint32]J1939Extractor
+}
+
+func NewDecoder() *Decoder {
+	d := &Decoder{
+		obd2Handlers:  make(map[bit29can.OBD2_S01PID]OBD2Extractor),
+		j1939Handlers: make(map[uint32]J1939Extractor),
+	}
+	d.registerOBD2Handlers()
+	d.registerJ1939Handlers()
+	return d
+}
+
+func (d *Decoder) Decode(frame can.Frame) ([]*DecodedSignal, error) {
+	if frame.ID == bit29can.Messages().OBD2.ID {
+		sig, err := d.decodeOBD2(frame)
+		if err != nil {
+			return nil, err
+		}
+
+		return []*DecodedSignal{sig}, nil
 	}
 
-	o := &OBD2{
-		message: bit29can.NewOBD2(),
+	handler, exists := d.j1939Handlers[frame.ID]
+	if exists {
+		return handler(frame)
 	}
 
-	if err := o.message.UnmarshalFrame(frame); err != nil {
-		fmt.Printf("   Raw data: % X\n", frame.Data[:frame.Length])
-		return nil, fmt.Errorf("⚠️  Failed to unmarshal frame: %v", err)
+	return nil, nil
+}
+
+func (d *Decoder) registerOBD2Handlers() {
+	msg := bit29can.Messages().OBD2
+
+	d.obd2Handlers[bit29can.OBD2_S01PID_S01PID0CEngineRPM] = func(m *bit29can.OBD2) (float64, string, string) {
+		signal := msg.S01PID0C_EngineRPM
+		raw := signal.UnmarshalUnsigned(m.Frame().Data)
+		phys := signal.ToPhysical(float64(raw))
+
+		return phys, signal.Name, signal.Unit
 	}
 
-	pid := o.message.S01PID()
-	fmt.Printf("📋 S01PID raw: %d (0x%02X)\n", uint8(o.message.S01PID()), uint8(o.message.S01PID()))
+	d.obd2Handlers[bit29can.OBD2_S01PID_S01PID04CalcEngineLoad] = func(m *bit29can.OBD2) (float64, string, string) {
+		signal := msg.S01PID04_CalcEngineLoad
+		raw := signal.UnmarshalUnsigned(m.Frame().Data)
+		phys := signal.ToPhysical(float64(raw))
 
-	switch pid {
-	case bit29can.OBD2_S01PID_S01PID0CEngineRPM:
-		rpmSignal := bit29can.Messages().OBD2.S01PID0C_EngineRPM
-		rpmRaw := rpmSignal.UnmarshalUnsigned(o.message.Frame().Data)
-		rpmPhys := rpmSignal.ToPhysical(float64(rpmRaw))
-
-		fmt.Printf("RPM (from high-level accessor): %.2f\n", o.message.S01PID0C_EngineRPM())
-		fmt.Printf("RPM (from manual unmarshal): %.2f %s\n", rpmPhys, rpmSignal.Unit)
-
-		return &OBD2{
-			service: uint8(o.message.Service()),
-			pid:     uint8(pid),
-			param:   "RPM",
-			value:   rpmPhys,
-			unit:    rpmSignal.Unit,
-		}, nil
-	case bit29can.OBD2_S01PID_S01PID04CalcEngineLoad:
-		engLoadSignal := bit29can.Messages().OBD2.S01PID04_CalcEngineLoad
-		engLoadRaw := engLoadSignal.UnmarshalUnsigned(o.message.Frame().Data)
-		engLoadPhys := engLoadSignal.ToPhysical(float64(engLoadRaw))
-
-		fmt.Printf("Engine Load (from high-level accessor): %.2f\n", o.message.S01PID04_CalcEngineLoad())
-		fmt.Printf("Engine Load (from manual unmarshal): %.2f%s\n", engLoadPhys, engLoadSignal.Unit)
-
-		return &OBD2{
-			service: uint8(o.message.Service()),
-			pid:     uint8(pid),
-			param:   "Engine Load",
-			value:   engLoadPhys,
-			unit:    engLoadSignal.Unit,
-		}, nil
-
-	case bit29can.OBD2_S01PID_S01PID11ThrottlePosition:
-		throtSignal := bit29can.Messages().OBD2.S01PID11_ThrottlePosition
-		throtRaw := throtSignal.UnmarshalUnsigned(o.message.Frame().Data)
-		throtPhys := throtSignal.ToPhysical(float64(throtRaw))
-
-		fmt.Printf("Throttle Manifold (from high-level accessor): %.2f\n", o.message.S01PID11_ThrottlePosition())
-		fmt.Printf("Throttle Manifold (from manual unmarshal): %.2f%s\n", throtPhys, throtSignal.Unit)
-
-		return &OBD2{
-			service: uint8(o.message.Service()),
-			pid:     uint8(pid),
-			param:   "Throttle Manifold",
-			value:   throtPhys,
-			unit:    throtSignal.Unit,
-		}, nil
-
-	case bit29can.OBD2_S01PID_S01PID05EngineCoolantTemp:
-		coolantSignal := bit29can.Messages().OBD2.S01PID05_EngineCoolantTemp
-		coolantRaw := coolantSignal.UnmarshalUnsigned(o.message.Frame().Data)
-		coolantPhys := coolantSignal.ToPhysical(float64(coolantRaw))
-
-		fmt.Printf("Engine Coolant Temp (from high-level accessor): %.2f\n", o.message.S01PID05_EngineCoolantTemp())
-		fmt.Printf("Engine Coolant Temp (from manual unmarshal): %.2f%s\n", coolantPhys, coolantSignal.Unit)
-
-		return &OBD2{
-			service: uint8(o.message.Service()),
-			pid:     uint8(pid),
-			param:   "Engine Coolant Temperature",
-			value:   coolantPhys,
-			unit:    coolantSignal.Unit,
-		}, nil
-	case bit29can.OBD2_S01PID_S01PID0FIntakeAirTemperature:
-		airSignal := bit29can.Messages().OBD2.S01PID0F_IntakeAirTemperature
-		airRaw := airSignal.UnmarshalUnsigned(o.message.Frame().Data)
-		airPhys := airSignal.ToPhysical(float64(airRaw))
-
-		fmt.Printf("Intake Air Temp (from high-level accessor): %.2f\n", o.message.S01PID0F_IntakeAirTemperature())
-		fmt.Printf("Intake Air Temp (from manual unmarshal): %.2f%s\n", airPhys, airSignal.Unit)
-
-		return &OBD2{
-			service: uint8(o.message.Service()),
-			pid:     uint8(pid),
-			param:   "Intake Air Temperature",
-			value:   airPhys,
-			unit:    airSignal.Unit,
-		}, nil
-	case bit29can.OBD2_S01PID_S01PID10MAFAirFlowRate:
-		airflowSignal := bit29can.Messages().OBD2.S01PID10_MAFAirFlowRate
-		airflowRaw := airflowSignal.UnmarshalUnsigned(o.message.Frame().Data)
-		airflowPhys := airflowSignal.ToPhysical(float64(airflowRaw))
-
-		fmt.Printf("Airflow Rate (from high-level accessor): %.2f\n", o.message.S01PID10_MAFAirFlowRate())
-		fmt.Printf("Airflow Rate (from manual unmarshal): %.2f%s\n", airflowPhys, airflowSignal.Unit)
-
-		return &OBD2{
-			service: uint8(o.message.Service()),
-			pid:     uint8(pid),
-			param:   "Airflow Rate",
-			value:   airflowPhys,
-			unit:    airflowSignal.Unit,
-		}, nil
-	case bit29can.OBD2_S01PID_S01PID0DVehicleSpeed:
-		speedSignal := bit29can.Messages().OBD2.S01PID0D_VehicleSpeed
-		speedRaw := speedSignal.UnmarshalUnsigned(o.message.Frame().Data)
-		speedPhys := speedSignal.ToPhysical(float64(speedRaw))
-
-		fmt.Printf("Speed (from high-level accessor): %d\n", o.message.S01PID0D_VehicleSpeed())
-		fmt.Printf("Speed (from manual unmarshal): %.2f%s\n", speedPhys, speedSignal.Unit)
-
-		return &OBD2{
-			service: uint8(o.message.Service()),
-			pid:     uint8(pid),
-			param:   "Speed",
-			value:   speedPhys,
-			unit:    speedSignal.Unit,
-		}, nil
-	default:
-		fmt.Printf("unhandled Mode 01 PID: 0x%02X", pid)
-		return nil, fmt.Errorf("unhandled Mode 01 PID: 0x%02X", pid)
+		return phys, signal.Name, signal.Unit
 	}
 
+	d.obd2Handlers[bit29can.OBD2_S01PID_S01PID11ThrottlePosition] = func(m *bit29can.OBD2) (float64, string, string) {
+		signal := msg.S01PID11_ThrottlePosition
+		raw := signal.UnmarshalUnsigned(m.Frame().Data)
+		phys := signal.ToPhysical(float64(raw))
+
+		return phys, signal.Name, signal.Unit
+	}
+
+	d.obd2Handlers[bit29can.OBD2_S01PID_S01PID05EngineCoolantTemp] = func(m *bit29can.OBD2) (float64, string, string) {
+		signal := msg.S01PID05_EngineCoolantTemp
+		raw := signal.UnmarshalUnsigned(m.Frame().Data)
+		phys := signal.ToPhysical(float64(raw))
+
+		return phys, signal.Name, signal.Unit
+	}
+
+	d.obd2Handlers[bit29can.OBD2_S01PID_S01PID0FIntakeAirTemperature] = func(m *bit29can.OBD2) (float64, string, string) {
+		signal := msg.S01PID0F_IntakeAirTemperature
+		raw := signal.UnmarshalUnsigned(m.Frame().Data)
+		phys := signal.ToPhysical(float64(raw))
+
+		return phys, signal.Name, signal.Unit
+	}
+
+	d.obd2Handlers[bit29can.OBD2_S01PID_S01PID10MAFAirFlowRate] = func(m *bit29can.OBD2) (float64, string, string) {
+		signal := msg.S01PID10_MAFAirFlowRate
+		raw := signal.UnmarshalUnsigned(m.Frame().Data)
+		phys := signal.ToPhysical(float64(raw))
+
+		return phys, signal.Name, signal.Unit
+	}
+
+	d.obd2Handlers[bit29can.OBD2_S01PID_S01PID0DVehicleSpeed] = func(m *bit29can.OBD2) (float64, string, string) {
+		signal := msg.S01PID0D_VehicleSpeed
+		raw := signal.UnmarshalUnsigned(m.Frame().Data)
+		phys := signal.ToPhysical(float64(raw))
+
+		return phys, signal.Name, signal.Unit
+	}
+}
+
+func (d *Decoder) registerJ1939Handlers() {
+	eec1Sig := j1939.Messages().EEC1
+	ccvs1Sig := j1939.Messages().CCVS1
+	lfe1Sig := j1939.Messages().LFE1
+	egf1Sig := j1939.Messages().EGF1
+	trf1Sig := j1939.Messages().TRF1
+
+	d.j1939Handlers[eec1Sig.ID] = func(f can.Frame) ([]*DecodedSignal, error) {
+		msg := j1939.NewEEC1()
+
+		if err := msg.UnmarshalFrame(f); err != nil {
+			return nil, err
+		}
+
+		var results []*DecodedSignal
+		signal := eec1Sig.EngineSpeed
+		raw := signal.UnmarshalUnsigned(f.Data)
+		phys := signal.ToPhysical(float64(raw))
+
+		results = append(results, &DecodedSignal{
+			source: "J1939",
+			param:  signal.Name,
+			value:  phys,
+			unit:   signal.Unit,
+		})
+
+		return results, nil
+	}
+
+	d.j1939Handlers[ccvs1Sig.ID] = func(f can.Frame) ([]*DecodedSignal, error) {
+		msg := j1939.NewCCVS1()
+
+		if err := msg.UnmarshalFrame(f); err != nil {
+			return nil, err
+		}
+
+		var results []*DecodedSignal
+		signal := ccvs1Sig.WheelBasedVehicleSpeed
+		raw := signal.UnmarshalUnsigned(f.Data)
+		phys := signal.ToPhysical(float64(raw))
+
+		results = append(results, &DecodedSignal{
+			source: "J1939",
+			param:  signal.Name,
+			value:  phys,
+			unit:   signal.Unit,
+		})
+
+		return results, nil
+	}
+
+	d.j1939Handlers[lfe1Sig.ID] = func(f can.Frame) ([]*DecodedSignal, error) {
+		msg := j1939.NewLFE1()
+
+		if err := msg.UnmarshalFrame(f); err != nil {
+			return nil, err
+		}
+
+		var results []*DecodedSignal
+		signal := lfe1Sig.EngineFuelRate
+		raw := signal.UnmarshalUnsigned(f.Data)
+		phys := signal.ToPhysical(float64(raw))
+
+		results = append(results, &DecodedSignal{
+			source: "J1939",
+			param:  signal.Name,
+			value:  phys,
+			unit:   signal.Unit,
+		})
+
+		return results, nil
+	}
+
+	d.j1939Handlers[egf1Sig.ID] = func(f can.Frame) ([]*DecodedSignal, error) {
+		msg := j1939.NewEGF1()
+
+		if err := msg.UnmarshalFrame(f); err != nil {
+			return nil, err
+		}
+
+		var results []*DecodedSignal
+		signal := egf1Sig.EngineIntakeAirMassFlowRate
+		raw := signal.UnmarshalUnsigned(f.Data)
+		phys := signal.ToPhysical(float64(raw))
+
+		results = append(results, &DecodedSignal{
+			source: "J1939",
+			param:  signal.Name,
+			value:  phys,
+			unit:   signal.Unit,
+		})
+
+		return results, nil
+	}
+
+	d.j1939Handlers[trf1Sig.ID] = func(f can.Frame) ([]*DecodedSignal, error) {
+		msg := j1939.NewTRF1()
+
+		if err := msg.UnmarshalFrame(f); err != nil {
+			return nil, err
+		}
+
+		var results []*DecodedSignal
+		signal := trf1Sig.TransmissionOilTemperature1
+		raw := signal.UnmarshalUnsigned(f.Data)
+		phys := signal.ToPhysical(float64(raw))
+
+		results = append(results, &DecodedSignal{
+			source: "J1939",
+			param:  signal.Name,
+			value:  phys,
+			unit:   signal.Unit,
+		})
+
+		return results, nil
+	}
+}
+
+func (d *Decoder) decodeOBD2(frame can.Frame) (*DecodedSignal, error) {
+	msg := bit29can.NewOBD2()
+	msg.UnmarshalFrame(frame)
+
+	handler, exists := d.obd2Handlers[msg.S01PID()]
+	if !exists {
+		return nil, fmt.Errorf("no handler found for PID 0x%02X", msg.S01PID())
+	}
+
+	val, name, unt := handler(msg)
+
+	return &DecodedSignal{
+		source: "OBD2",
+		param:  name,
+		value:  val,
+		unit:   unt,
+	}, nil
 }

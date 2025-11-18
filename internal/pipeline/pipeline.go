@@ -9,11 +9,11 @@ import (
 	"strings"
 	"sync"
 	"syscall"
+	"time"
 
 	"ev-gitlab.mataelang.net/ev-connect/create-ias/can.git"
 	pb "github.com/jojohimawan/intelligent-agent-system/api"
 	internalcan "github.com/jojohimawan/intelligent-agent-system/internal/can"
-	bit29can "github.com/jojohimawan/intelligent-agent-system/internal/can/gen"
 	"github.com/jojohimawan/intelligent-agent-system/internal/kafka"
 	"github.com/jojohimawan/intelligent-agent-system/internal/nmea"
 	"github.com/jojohimawan/intelligent-agent-system/internal/serial"
@@ -30,11 +30,13 @@ func Run(
 	locations := make(chan *pb.LocationRequest, 50)
 
 	rawFrame := make(chan can.Frame, 50)
-	decodedFrame := make(chan *internalcan.OBD2, 50)
-	parsedFrame := make(chan *pb.VehicleOBD, 50)
+	decodedFrame := make(chan *internalcan.DecodedSignal, 50)
+	parsedFrame := make(chan *pb.TelematicsBatch, 50)
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
+
+	decoder := internalcan.NewDecoder()
 
 	var wg sync.WaitGroup
 
@@ -60,7 +62,7 @@ func Run(
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		DecodeFrameLoop(ctx, rawFrame, decodedFrame)
+		DecodeFrameLoop(ctx, decoder, rawFrame, decodedFrame)
 		close(decodedFrame)
 	}()
 
@@ -115,11 +117,6 @@ func ReadCanFrameLoop(ctx context.Context, sr *serial.VcanConnection, out chan<-
 		for sr.Recv.Receive() {
 			frame := sr.Recv.Frame()
 
-			if frame.ID != bit29can.Messages().OBD2.ID || !frame.IsExtended {
-				fmt.Print("Frame ID mismatch or is not extended. Skipping...")
-				continue
-			}
-
 			select {
 			case resultCh <- readResult{frame, nil}:
 			case <-ctx.Done():
@@ -143,7 +140,7 @@ func ReadCanFrameLoop(ctx context.Context, sr *serial.VcanConnection, out chan<-
 	}
 }
 
-func DecodeFrameLoop(ctx context.Context, in <-chan can.Frame, out chan<- *internalcan.OBD2) {
+func DecodeFrameLoop(ctx context.Context, d *internalcan.Decoder, in <-chan can.Frame, out chan<- *internalcan.DecodedSignal) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -153,51 +150,91 @@ func DecodeFrameLoop(ctx context.Context, in <-chan can.Frame, out chan<- *inter
 				return
 			}
 
-			decodedFrame, err := internalcan.DecodeMode01PID(frame)
+			signals, err := d.Decode(frame)
 			if err != nil {
-				fmt.Printf("%v", err)
+				fmt.Errorf("%v", err)
 				continue
 			}
 
-			out <- decodedFrame
+			for _, sig := range signals {
+				select {
+				case out <- sig:
+				case <-ctx.Done():
+					return
+				}
+			}
 		}
 	}
 }
 
-func ParseFrameLoop(ctx context.Context, in <-chan *internalcan.OBD2, out chan<- *pb.VehicleOBD) {
+func ParseFrameLoop(ctx context.Context, in <-chan *internalcan.DecodedSignal, out chan<- *pb.TelematicsBatch) {
+	const batchSize = 10
+	buffer := make([]*internalcan.DecodedSignal, 0, batchSize)
+	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
+
+	flush := func() {
+		if len(buffer) == 0 {
+			return
+		}
+
+		batchMsg, err := internalcan.MarshalSignal("4S4BRDLC3B2413966", buffer)
+		if err != nil {
+			fmt.Printf("Error marshaling batch: %v\n", err)
+		} else {
+			select {
+			case out <- batchMsg:
+			case <-ctx.Done():
+				return
+
+			}
+		}
+
+		buffer = buffer[:0]
+	}
+
 	for {
 		select {
 		case <-ctx.Done():
+			flush()
 			return
 		case decodedFrame, ok := <-in:
 			if !ok {
+				flush()
 				return
 			}
 
-			parsedMsg, err := internalcan.MessageToOBD("4S4BRDLC3B2413966", decodedFrame)
-			if err != nil {
-				fmt.Printf("%v", err)
-				continue
-			}
+			buffer = append(buffer, decodedFrame)
 
-			out <- parsedMsg
+			if len(buffer) >= batchSize {
+				flush()
+				ticker.Reset(10 * time.Second)
+			}
+		case <-ticker.C:
+			flush()
 		}
 	}
 }
 
-func PublishFrameLoop(ctx context.Context, producer *kafka.Producer, in <-chan *pb.VehicleOBD) {
-	topic := "vehicle-obd"
+func PublishFrameLoop(ctx context.Context, producer *kafka.Producer, in <-chan *pb.TelematicsBatch) {
+	topic := "vehicle-telematics"
 
 	for {
 		select {
 		case <-ctx.Done():
+			log.Println("Context cancelled, flushing producer...")
+			producer.Flush()
+			log.Println("Producer flushed. exiting loop...")
 			return
 		case parsedMsg, ok := <-in:
 			if !ok {
+				log.Println("Channel closed, flushing producer...")
+				producer.Flush()
+				log.Println("Producer flushed. exiting loop...")
 				return
 			}
 
-			if err := producer.PublishOBD(parsedMsg, &topic); err != nil {
+			if err := producer.PublishTelematics(parsedMsg, &topic); err != nil {
 				log.Printf("Kafka publish error: %v", err)
 			}
 		}

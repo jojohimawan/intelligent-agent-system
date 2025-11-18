@@ -71,8 +71,8 @@ func (p *Producer) PublishLocation(loc *pb.LocationRequest, topic *string, optio
 	}, nil)
 }
 
-func (p *Producer) PublishOBD(obd *pb.VehicleOBD, topic *string, option ...context.Context) error {
-	serializedPayload, err := p.protobufSerde.Serialize(*topic, obd)
+func (p *Producer) PublishTelematics(telematics *pb.TelematicsBatch, topic *string, option ...context.Context) error {
+	serializedPayload, err := p.protobufSerde.Serialize(*topic, telematics)
 	if err != nil {
 		return fmt.Errorf("failed to serialize protobuf message: %w", err)
 	}
@@ -82,6 +82,7 @@ func (p *Producer) PublishOBD(obd *pb.VehicleOBD, topic *string, option ...conte
 			Topic:     topic,
 			Partition: ckafka.PartitionAny,
 		},
+		Key:   []byte(telematics.Vin),
 		Value: serializedPayload,
 		Headers: []ckafka.Header{
 			{
@@ -94,4 +95,8 @@ func (p *Producer) PublishOBD(obd *pb.VehicleOBD, topic *string, option ...conte
 
 func (p *Producer) Close() {
 	p.kafkaProducer.Close()
+}
+
+func (p *Producer) Flush() {
+	p.kafkaProducer.Flush(15 * 1000)
 }

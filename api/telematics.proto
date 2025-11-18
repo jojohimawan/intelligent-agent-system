@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package telematics;
+option go_package = "github.com/jojohimawan/intelligent-agent-system/api;api";
+
+message TelematicsBatch {
+    string vin = 1;
+    google.protobuf.Timestamp capture_time = 2;
+    repeated Telematics signals = 3;
+}
+
+message Telematics {
+    string source = 1;
+    string param = 2;
+
+    oneof value {
+        double double_val = 3;
+        int64 int_val = 4;
+        bool bool_val = 5;
+        string string_val = 6;
+    }
+
+    string unit = 7;
+}

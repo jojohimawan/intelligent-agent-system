@@ -1,18 +1,28 @@
 package can
 
 import (
-	"fmt"
+	"time"
+
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 
 	pb "github.com/jojohimawan/intelligent-agent-system/api"
 )
 
-func MessageToOBD(vin string, msg *OBD2) (*pb.VehicleOBD, error) {
-	return &pb.VehicleOBD{
-		Vin:     vin,
-		Service: fmt.Sprintf("0x%02X", msg.service),
-		Pid:     fmt.Sprintf("0x%02X", msg.pid),
-		Param:   msg.param,
-		Value:   msg.value,
-		Unit:    msg.unit,
+func MarshalSignal(vin string, signals []*DecodedSignal) (*pb.TelematicsBatch, error) {
+	var protoSignals []*pb.Telematics
+
+	for _, s := range signals {
+		protoSignals = append(protoSignals, &pb.Telematics{
+			Source: s.source,
+			Param:  s.param,
+			Value:  &pb.Telematics_DoubleVal{DoubleVal: s.value},
+			Unit:   s.unit,
+		})
+	}
+
+	return &pb.TelematicsBatch{
+		Vin:         vin,
+		CaptureTime: timestamppb.New(time.Now()),
+		Signals:     protoSignals,
 	}, nil
 }
