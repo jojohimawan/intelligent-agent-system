@@ -117,6 +117,8 @@ func ReadCanFrameLoop(ctx context.Context, sr *serial.VcanConnection, out chan<-
 		for sr.Recv.Receive() {
 			frame := sr.Recv.Frame()
 
+			log.Println("Received frame...")
+
 			select {
 			case resultCh <- readResult{frame, nil}:
 			case <-ctx.Done():
@@ -150,13 +152,16 @@ func DecodeFrameLoop(ctx context.Context, d *internalcan.Decoder, in <-chan can.
 				return
 			}
 
+			log.Printf("Pipeline: Processing Frame ID 0x%X", frame.ID)
+
 			signals, err := d.Decode(frame)
 			if err != nil {
-				fmt.Errorf("%v", err)
+				log.Printf("Pipeline: Decode Error for ID 0x%X: %v", frame.ID, err)
 				continue
 			}
 
 			for _, sig := range signals {
+				log.Printf("Pipeline: Decoded Signal")
 				select {
 				case out <- sig:
 				case <-ctx.Done():
