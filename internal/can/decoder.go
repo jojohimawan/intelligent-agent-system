@@ -252,6 +252,8 @@ func (d *Decoder) registerCREATEHandlers() {
 	frcmSig := create.Messages().IOV_FrontRightCornerMotor1
 	flcmSig := create.Messages().IOV_FrontLeftCornerMotor1
 
+	socSig := create.Messages().BMS_DALY_SoCStatus
+
 	d.createHandlers[brcmSig.ID] = func(f can.Frame) ([]*DecodedSignal, error) {
 		log.Printf("Decoding BackRightCornerMotor frame..")
 		msg := create.NewIOV_BackRightCornerMotor1()
@@ -419,6 +421,59 @@ func (d *Decoder) registerCREATEHandlers() {
 			param:  dutySignal.Name,
 			value:  dutyPhys,
 			unit:   dutySignal.Unit,
+		})
+
+		return results, nil
+	}
+
+	d.createHandlers[socSig.ID] = func(f can.Frame) ([]*DecodedSignal, error) {
+		log.Printf("Decoding SoC frame..")
+		msg := create.NewBMS_DALY_SoCStatus()
+
+		if err := msg.UnmarshalFrame(f); err != nil {
+			return nil, err
+		}
+
+		var results []*DecodedSignal
+
+		socSignal := socSig.DALY_BatterySoC
+		socRaw := socSignal.UnmarshalUnsigned(f.Data)
+		socPhys := socSignal.ToPhysical(float64(socRaw))
+		results = append(results, &DecodedSignal{
+			source: "CReATE ECU",
+			param:  socSignal.Name,
+			value:  socPhys,
+			unit:   socSignal.Unit,
+		})
+
+		currentSignal := socSig.DALY_BatteryCurrent
+		currentRaw := currentSignal.UnmarshalUnsigned(f.Data)
+		currentPhys := currentSignal.ToPhysical(float64(currentRaw))
+		results = append(results, &DecodedSignal{
+			source: "CReATE ECU",
+			param:  currentSignal.Name,
+			value:  currentPhys,
+			unit:   currentSignal.Unit,
+		})
+
+		voltageSignal := socSig.DALY_CollectedTotalVoltage
+		voltageRaw := voltageSignal.UnmarshalUnsigned(f.Data)
+		voltagePhys := voltageSignal.ToPhysical(float64(voltageRaw))
+		results = append(results, &DecodedSignal{
+			source: "CReATE ECU",
+			param:  voltageSignal.Name,
+			value:  voltagePhys,
+			unit:   voltageSignal.Unit,
+		})
+
+		pressureSignal := socSig.DALY_CollectedTotalVoltage
+		pressureRaw := pressureSignal.UnmarshalUnsigned(f.Data)
+		pressurePhys := pressureSignal.ToPhysical(float64(pressureRaw))
+		results = append(results, &DecodedSignal{
+			source: "CReATE ECU",
+			param:  pressureSignal.Name,
+			value:  pressurePhys,
+			unit:   pressureSignal.Unit,
 		})
 
 		return results, nil
