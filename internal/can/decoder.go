@@ -466,7 +466,7 @@ func (d *Decoder) registerCREATEHandlers() {
 			unit:   voltageSignal.Unit,
 		})
 
-		pressureSignal := socSig.DALY_CollectedTotalVoltage
+		pressureSignal := socSig.DALY_AccumulatedPressure
 		pressureRaw := pressureSignal.UnmarshalUnsigned(f.Data)
 		pressurePhys := pressureSignal.ToPhysical(float64(pressureRaw))
 		results = append(results, &DecodedSignal{
