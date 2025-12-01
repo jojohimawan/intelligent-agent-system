@@ -9,11 +9,16 @@ import (
 )
 
 type Config struct {
-	KafkaBrokerURL    string `env:"KAFKA_BROKER_URL,required=true"`
-	SchemaRegistryURL string `env:"SCHEMA_REGISTRY_URL,required=true"`
-	SerialPort        string `env:"SERIAL_PORT,required=true"`
-	CanNetwork        string `env:"CAN_NETWORK, required=true"`
-	CanNetworkAddress string `env:"CAN_NETWORK_ADDRESS, required=true"`
+	KafkaBrokerURL      string `env:"KAFKA_BROKER_URL,required=true"`
+	SchemaRegistryURL   string `env:"SCHEMA_REGISTRY_URL,required=true"`
+	SerialPort          string `env:"SERIAL_PORT,required=true"`
+	CanNetwork          string `env:"CAN_NETWORK, required=true"`
+	CanNetworkAddress   string `env:"CAN_NETWORK_ADDRESS, required=true"`
+	MongoDBURI          string `env:"MONGODB_URI, required=true"`
+	MongoDBDatabase     string `env:"MONGODB_DATABASE, required=true"`
+	MongoDBCollection   string `env:"MONGODB_COLLECTION, required=true"`
+	MongoDBAuthUser     string `env:"MONGODB_AUTH_USER, required=true"`
+	MongoDBAuthPassword string `env:"MONGODB_AUTH_PASSWORD, required=true"`
 
 	Environment string `env:"APP_ENV,default=development"`
 

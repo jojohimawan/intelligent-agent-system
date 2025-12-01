@@ -1,0 +1,263 @@
+[
+{
+"protocol": "CReATE_ECU",
+"signal_name": "VESC_StatusERPM1",
+"vss": {
+"path": "Vehicle.Powertrain.ElectricMotor.1.Speed",
+"unit": "RPM",
+"type": "int32"
+}
+},
+{
+"protocol": "CReATE_ECU",
+"signal_name": "VESC_StatusCurrent1",
+"vss": {
+"path": "Vehicle.Powertrain.ElectricMotor.1.Current",
+"unit": "A",
+"type": "float"
+}
+},
+{
+"protocol": "CReATE_ECU",
+"signal_name": "VESC_StatusDutyCycle1",
+"vss": {
+"path": "Vehicle.Powertrain.ElectricMotor.1.DutyCycle",
+"unit": "Percent",
+"type": "float"
+}
+},
+{
+"protocol": "CReATE_ECU",
+"signal_name": "VESC_StatusERPM2",
+"vss": {
+"path": "Vehicle.Powertrain.ElectricMotor.2.Speed",
+"unit": "RPM",
+"type": "int32"
+}
+},
+{
+"protocol": "CReATE_ECU",
+"signal_name": "VESC_StatusCurrent2",
+"vss": {
+"path": "Vehicle.Powertrain.ElectricMotor.2.Current",
+"unit": "A",
+"type": "float"
+}
+},
+{
+"protocol": "CReATE_ECU",
+"signal_name": "VESC_StatusDutyCycle2",
+"vss": {
+"path": "Vehicle.Powertrain.ElectricMotor.2.DutyCycle",
+"unit": "Percent",
+"type": "float"
+}
+},
+{
+"protocol": "CReATE_ECU",
+"signal_name": "VESC_StatusERPM3",
+"vss": {
+"path": "Vehicle.Powertrain.ElectricMotor.3.Speed",
+"unit": "RPM",
+"type": "int32"
+}
+},
+{
+"protocol": "CReATE_ECU",
+"signal_name": "VESC_StatusCurrent3",
+"vss": {
+"path": "Vehicle.Powertrain.ElectricMotor.3.Current",
+"unit": "A",
+"type": "float"
+}
+},
+{
+"protocol": "CReATE_ECU",
+"signal_name": "VESC_StatusDutyCycle3",
+"vss": {
+"path": "Vehicle.Powertrain.ElectricMotor.3.DutyCycle",
+"unit": "Percent",
+"type": "float"
+}
+},
+{
+"protocol": "CReATE_ECU",
+"signal_name": "VESC_StatusERPM4",
+"vss": {
+"path": "Vehicle.Powertrain.ElectricMotor.4.Speed",
+"unit": "RPM",
+"type": "int32"
+}
+},
+{
+"protocol": "CReATE_ECU",
+"signal_name": "VESC_StatusCurrent4",
+"vss": {
+"path": "Vehicle.Powertrain.ElectricMotor.4.Current",
+"unit": "A",
+"type": "float"
+}
+},
+{
+"protocol": "CReATE_ECU",
+"signal_name": "VESC_StatusDutyCycle4",
+"vss": {
+"path": "Vehicle.Powertrain.ElectricMotor.4.DutyCycle",
+"unit": "Percent",
+"type": "float"
+}
+},
+{
+"protocol": "CReATE_ECU",
+"signal_name": "DALY_BatterySoC",
+"vss": {
+"path": "Vehicle.Powertrain.TractionBattery.StateOfCharge.Current",
+"unit": "Percent",
+"type": "float"
+}
+},
+{
+"protocol": "CReATE_ECU",
+"signal_name": "DALY_BatteryCurrent",
+"vss": {
+"path": "Vehicle.Powertrain.TractionBattery.Current",
+"unit": "A",
+"type": "float"
+}
+},
+{
+"protocol": "CReATE_ECU",
+"signal_name": "DALY_CollectedTotalVoltage",
+"vss": {
+"path": "Vehicle.Powertrain.TractionBattery.Voltage",
+"unit": "V",
+"type": "float"
+}
+},
+{
+"protocol": "CReATE_ECU",
+"signal_name": "DALY_MonomerTemp1",
+"vss": {
+"path": "Vehicle.Powertrain.TractionBattery.Temperature.Cell.1",
+"unit": "celsius",
+"type": "int16"
+}
+},
+{
+"protocol": "CReATE_ECU",
+"signal_name": "DALY_MonomerVoltage1",
+"vss": {
+"path": "Vehicle.Powertrain.TractionBattery.Cell.1.Voltage",
+"unit": "mV",
+"type": "int16"
+}
+},
+{
+"protocol": "J1939",
+"signal_name": "EngineSpeed",
+"vss": {
+"path": "Vehicle.Powertrain.CombustionEngine.Speed",
+"unit": "RPM",
+"type": "float"
+}
+},
+{
+"protocol": "J1939",
+"signal_name": "WheelBasedVehicleSpeed",
+"vss": {
+"path": "Vehicle.Speed",
+"unit": "km/h",
+"type": "float"
+}
+},
+{
+"protocol": "J1939",
+"signal_name": "EngineFuelRate",
+"vss": {
+"path": "Vehicle.Powertrain.FuelSystem.Rate",
+"unit": "l/h",
+"type": "float"
+}
+},
+{
+"protocol": "J1939",
+"signal_name": "EngineIntakeAirMassFlowRate",
+"vss": {
+"path": "Vehicle.Powertrain.CombustionEngine.Aspiration.Intake.Flow",
+"unit": "kg/h",
+"type": "float"
+}
+},
+{
+"protocol": "J1939",
+"signal_name": "TransmissionOilTemperature1",
+"vss": {
+"path": "Vehicle.Powertrain.Transmission.Temperature",
+"unit": "celsius",
+"type": "float"
+}
+},
+{
+"protocol": "OBD2",
+"signal_name": "S01PID0C_EngineRPM",
+"vss": {
+"path": "Vehicle.Powertrain.CombustionEngine.Speed",
+"unit": "RPM",
+"type": "float"
+}
+},
+{
+"protocol": "OBD2",
+"signal_name": "S01PID0D_VehicleSpeed",
+"vss": {
+"path": "Vehicle.Speed",
+"unit": "km/h",
+"type": "int32"
+}
+},
+{
+"protocol": "OBD2",
+"signal_name": "S01PID05_EngineCoolantTemp",
+"vss": {
+"path": "Vehicle.Powertrain.CombustionEngine.ECT",
+"unit": "celsius",
+"type": "int32"
+}
+},
+{
+"protocol": "OBD2",
+"signal_name": "S01PID0F_IntakeAirTemperature",
+"vss": {
+"path": "Vehicle.Powertrain.CombustionEngine.Aspiration.Intake.Temperature",
+"unit": "celsius",
+"type": "int32"
+}
+},
+{
+"protocol": "OBD2",
+"signal_name": "S01PID04_CalcEngineLoad",
+"vss": {
+"path": "Vehicle.Powertrain.CombustionEngine.Load",
+"unit": "Percent",
+"type": "float"
+}
+},
+{
+"protocol": "OBD2",
+"signal_name": "S01PID11_ThrottlePosition",
+"vss": {
+"path": "Vehicle.Powertrain.CombustionEngine.Aspiration.Throttle.Position",
+"unit": "Percent",
+"type": "float"
+}
+},
+{
+"protocol": "OBD2",
+"signal_name": "S01PID10_MAFAirFlowRate",
+"vss": {
+"path": "Vehicle.Powertrain.CombustionEngine.Aspiration.Intake.Flow",
+"unit": "g/s",
+"type": "float"
+}
+}
+]

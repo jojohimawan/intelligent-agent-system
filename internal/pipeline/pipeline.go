@@ -15,22 +15,25 @@ import (
 	pb "github.com/jojohimawan/intelligent-agent-system/api"
 	internalcan "github.com/jojohimawan/intelligent-agent-system/internal/can"
 	"github.com/jojohimawan/intelligent-agent-system/internal/kafka"
+	"github.com/jojohimawan/intelligent-agent-system/internal/mapper"
 	"github.com/jojohimawan/intelligent-agent-system/internal/nmea"
 	"github.com/jojohimawan/intelligent-agent-system/internal/serial"
 	"github.com/jojohimawan/intelligent-agent-system/internal/util"
+	"github.com/jojohimawan/intelligent-agent-system/pkg/models"
 )
 
 func Run(
 	ctx context.Context,
 	sr *serial.SerialReader,
 	sv *serial.VcanConnection,
+	mp *mapper.Service,
 	producer *kafka.Producer,
 ) error {
 	rawSentences := make(chan string, 50)
 	locations := make(chan *pb.LocationRequest, 50)
 
 	rawFrame := make(chan can.Frame, 50)
-	decodedFrame := make(chan *internalcan.DecodedSignal, 50)
+	decodedFrame := make(chan *models.DecodedSignal, 50)
 	parsedFrame := make(chan *pb.TelematicsBatch, 50)
 
 	ctx, cancel := context.WithCancel(ctx)
@@ -69,7 +72,7 @@ func Run(
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		ParseFrameLoop(ctx, decodedFrame, parsedFrame)
+		ParseFrameLoop(ctx, decodedFrame, parsedFrame, mp)
 		close(parsedFrame)
 	}()
 
@@ -142,7 +145,7 @@ func ReadCanFrameLoop(ctx context.Context, sr *serial.VcanConnection, out chan<-
 	}
 }
 
-func DecodeFrameLoop(ctx context.Context, d *internalcan.Decoder, in <-chan can.Frame, out chan<- *internalcan.DecodedSignal) {
+func DecodeFrameLoop(ctx context.Context, d *internalcan.Decoder, in <-chan can.Frame, out chan<- *models.DecodedSignal) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -172,9 +175,9 @@ func DecodeFrameLoop(ctx context.Context, d *internalcan.Decoder, in <-chan can.
 	}
 }
 
-func ParseFrameLoop(ctx context.Context, in <-chan *internalcan.DecodedSignal, out chan<- *pb.TelematicsBatch) {
+func ParseFrameLoop(ctx context.Context, in <-chan *models.DecodedSignal, out chan<- *pb.TelematicsBatch, mp *mapper.Service) {
 	const batchSize = 10
-	buffer := make([]*internalcan.DecodedSignal, 0, batchSize)
+	buffer := make([]*models.DecodedSignal, 0, batchSize)
 	ticker := time.NewTicker(10 * time.Second)
 	defer ticker.Stop()
 
@@ -183,7 +186,7 @@ func ParseFrameLoop(ctx context.Context, in <-chan *internalcan.DecodedSignal, o
 			return
 		}
 
-		batchMsg, err := internalcan.MarshalSignal("4S4BRDLC3B2413966", buffer)
+		batchMsg, err := internalcan.MarshalSignal("4S4BRDLC3B2413966", mp, buffer)
 		if err != nil {
 			fmt.Printf("Error marshaling batch: %v\n", err)
 		} else {

@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/jojohimawan/intelligent-agent-system/internal/config"
 	"github.com/jojohimawan/intelligent-agent-system/internal/kafka"
+	"github.com/jojohimawan/intelligent-agent-system/internal/mapper"
 	"github.com/jojohimawan/intelligent-agent-system/internal/pipeline"
 	"github.com/jojohimawan/intelligent-agent-system/internal/serial"
 )
@@ -17,6 +19,23 @@ func main() {
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
+	}
+
+	mongoStore, err := mapper.NewMongoStore(ctx, mapper.MongoConfig{
+		URI:        cfg.MongoDBURI,
+		Database:   cfg.MongoDBDatabase,
+		Collection: cfg.MongoDBCollection,
+		Username:   cfg.MongoDBAuthUser,
+		Password:   cfg.MongoDBAuthPassword,
+		Timeout:    2 * time.Second,
+	})
+	if err != nil {
+		log.Printf("[WARN]Main: MongoDB connection failed: %v", err)
+	}
+
+	mapService := mapper.NewService(mongoStore, "./data/mappings.json")
+	if err := mapService.Init(ctx); err != nil {
+		log.Fatalf("[ERR]Main: Failed to init mappings: %v", err)
 	}
 
 	kafkaProducer, err := kafka.NewProducer(
@@ -40,7 +59,7 @@ func main() {
 	}
 	defer sv.Close()
 
-	if err := pipeline.Run(ctx, sr, sv, kafkaProducer); err != nil {
+	if err := pipeline.Run(ctx, sr, sv, mapService, kafkaProducer); err != nil {
 		log.Fatalf("pipeline error: %v", err)
 	}
 }
