@@ -18,7 +18,7 @@ type Producer struct {
 	protobufSerde        *protobuf.Serializer
 }
 
-func NewProducer(broker, schemaRegistryURL, topic string) (*Producer, error) {
+func NewProducer(broker, schemaRegistryURL string) (*Producer, error) {
 	p, err := ckafka.NewProducer(&ckafka.ConfigMap{
 		"bootstrap.servers": broker,
 		"client.id":         "ias-go-producer",

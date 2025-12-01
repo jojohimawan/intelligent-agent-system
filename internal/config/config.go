@@ -9,10 +9,11 @@ import (
 )
 
 type Config struct {
-	KafkaBrokerURL            string `env:"KAFKA_BROKER_URL,required=true"`
-	SchemaRegistryURL         string `env:"SCHEMA_REGISTRY_URL,required=true"`
-	SerialPort                string `env:"SERIAL_PORT,required=true"`
-	KafkaTopicVehicleLocation string `env:"KAFKA_TOPIC_VEHICLE_LOCATION,default=vehicle-location"`
+	KafkaBrokerURL    string `env:"KAFKA_BROKER_URL,required=true"`
+	SchemaRegistryURL string `env:"SCHEMA_REGISTRY_URL,required=true"`
+	SerialPort        string `env:"SERIAL_PORT,required=true"`
+	CanNetwork        string `env:"CAN_NETWORK, required=true"`
+	CanNetworkAddress string `env:"CAN_NETWORK_ADDRESS, required=true"`
 
 	Environment string `env:"APP_ENV,default=development"`
 
